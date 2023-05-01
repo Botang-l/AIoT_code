@@ -1,0 +1,9 @@
+{
+  "editor.formatOnSave": true,
+  "markdown.extension.toc.slugifyMode": "gitlab",
+  "markdown.extension.toc.levels": "2..3",
+  "markdown.extension.list.indentationSize": "inherit",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.defaultInterpreterPath": "venv/bin/python",
+  "python.formatting.provider": "yapf"
+}

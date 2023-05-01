@@ -1,4 +1,4 @@
-# Contributing to USCC AoT code
+# Contributing to USCC AIoT code
 
 ## Table of Contents <!-- omit in toc -->
 - [Submission Guidelines](#submission-guidelines)
@@ -14,7 +14,7 @@
 If you want to discuss something related to the USCC AIoT code such as found a bug or missing a feature, it is welcome to [submit a issue](https://github.com/Botang-l/AIoT_code/issues/new). Before you submit a issue, please search the issue track and make sure there is no similar issue that is still in progress or has come to a conclusion. There are several templates in the repository, please choose a suitable one and write the details as much as better to describe your idea.
 
 ### Submitting a Merge Request
-After making some improvements for USCC AIoT code, you can submit a merge request to merge your contribution to our [develop](https://playlab.computing.ncku.edu.tw:4001/ITH/website/tree/develop) branch. There are several steps before submitting a merge request:
+After making some improvements for USCC AIoT code, you can submit a merge request to merge your contribution to our [develop](https://github.com/Botang-l/AIoT_code/tree/develop) branch. There are several steps before submitting a merge request:
 
 1. Make sure there is no duplicate existing features.
 2. Make sure your commits follow our [development rules](#development-rules) and [commit message conventions](#git-commit-message-convention).
@@ -30,10 +30,7 @@ Whichever method you choose to work on this project, please comply with the rule
 ## Documentation
 To keep this project moving forward, it is important to document the whole development information about the project. Developers can realize the development status and technical details from these documents. Remember to update all related documents while making any changes.
 
-- Backend server
-    - [REST API Specification](docs/REST_API.md)
-    - [Database Schema](docs/DATABASE.md)
-- Frontend webpage
+- [development information](https://hackmd.io/@linhoward0522/2023AIoT/https%3A%2F%2Fhackmd.io%2FMNjf3sk6QhyMo1THJLeB2Q%3Fview)
 
 ## Git Branch Naming
 Except for permanent branches (e.g. `main` and `develop`), all temporary branches should be named in the format `<TYPE>/<ISSUE>-<DETAIL>` such as `feat/1-integer-datatype`. If the goal of a branch has not related to any issues, you can either create an issue to describe the detail of your planning or skip the `<ISSUE>-` in the branch name. With this convention, we can understand the purpose of each branch from its name directly.

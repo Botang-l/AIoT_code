@@ -1,0 +1,28 @@
+[tool.yapf]
+BASED_ON_STYLE = "google"
+BLANK_LINE_BEFORE_NESTED_CLASS_OR_DEF = false
+COLUMN_LIMIT = 120
+COALESCE_BRACKETS = true
+DEDENT_CLOSING_BRACKETS = true
+DISABLE_ENDING_COMMA_HEURISTIC = true
+INDENT_WIDTH = 4
+SPACES_AROUND_SUBSCRIPT_COLON = true
+SPACES_BEFORE_COMMENT = 4
+SPLIT_ALL_COMMA_SEPARATED_VALUES = true
+SPLIT_BEFORE_LOGICAL_OPERATOR = true
+
+[tool.yapfignore]
+ignore_patterns = [
+    ".vscode/",
+    "app/",
+    "database/",
+    "deployment/",
+    "venv/",
+    "__pycache__/",
+    "**/__pycache__/",
+]
+
+[tool.pyright]
+include = ["reinforcement_learning/", "time_series_model/", "main.py"]
+pythonPlatform = "Linux"
+typeCheckingMode = "basic"
