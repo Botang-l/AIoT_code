@@ -1,8 +1,7 @@
-# ITH Website
+# AIoT_code
 
 ## Development
 
--   Enter the [ITH workspace](https://playlab.computing.ncku.edu.tw:4001/ITH/workspace)
 -   Clone this repo
     ```shell
     $ git clone https://github.com/Botang-l/AIoT_code
