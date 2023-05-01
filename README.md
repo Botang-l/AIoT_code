@@ -12,9 +12,9 @@
     ```shell
     $ pip3 install -r deployment/requirements.txt
     ```
--   Run the server on port 5000
+-   Run the code
     ```shell
-    $ python3 server.py
+    $ python3 main.py
     ```
 - Look at [Developer Guide](docs/DEVELOPER.md) for more details about how to start developing this repository.
 - Refer to [contributing guidelines](CONTRIBUTING.md) for the conventions and rules that contributors should follow.

@@ -15,14 +15,14 @@
 
 ### Getting the Source Code
 ```shell
-user-workspace:~$ cd projects/
-user-workspace:~/projects$ $ git clone https://github.com/Botang-l/AIoT_code
-user-workspace:~/projects$ cd AIoT_code
+$ cd projects/
+$ git clone https://github.com/Botang-l/AIoT_code
+$ cd AIoT_code
 ```
 
 ### Installing Dependencies
 
-For the development, it is recommended to use [virtualenv](https://pypi.org/project/virtualenv/), a Python virtual environment, to manage all needed packages. The required packages are listed in [deployment/requirements.txt](../deployment/requirements.txt). Make sure to install Python packages and execute backend server when the shell prefix `(venv)` appears, which indicates that the virtualenv `venv` is enabled.
+For the development, The required packages are listed in [deployment/requirements.txt](../deployment/requirements.txt). Make sure to install Python packages. 
 
 ```shell
 $ pip3 install -r deployment/requirements.txt    # install packages
@@ -37,9 +37,9 @@ To remain consistent coding style and statically analyze the correctness of our 
 For the AI model developed in Python, we choose [Pyright](https://github.com/microsoft/pyright) from Microsoft and [yapf](https://github.com/google/yapf) from Google as the linter and formatter.
 
 ```shell
-$ user-workspace:~$ cd projects/AIoT_code
+$ cd AIoT_code
 
-user-workspace:~$ pyright .                  # statically type checking
+$ pyright .                  # statically type checking
 ... skip ...
 Found 15 source files
 pyright 1.1.279
@@ -47,7 +47,7 @@ pyright 1.1.279
 Completed in 1.008sec
 ... skip ...
 
-user-workspace:~$ $ yapf -i -r -vv .           # coding style formatting
+$  yapf -i -r -vv .           # coding style formatting
 Reformatting ./server.py
 Reformatting ./flaskr/utils.py
 Reformatting ./flaskr/config.py
@@ -57,4 +57,4 @@ Reformatting ./flaskr/config.py
 ## Editor Configurations
 There are some basic configurations of common editors for this repository. Please note that these settings might need to be customized according to your environment or be integrated with the configurations of the other submodules in the ITH website repository. It is also welcome to provide configurations for more editors or update the existing files with more appropriate settings.
 
-- [VS Code](editors/vscode/): copy to `/path/to/ITH/website/`, remame it as `.vscode/`, and restart VS Code.
+- [VS Code](editors/vscode/): copy to `editors/vscode/`, remame it as `.vscode/`, and restart VS Code.
