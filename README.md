@@ -15,7 +15,7 @@
     $ python3 main.py
     ```
 - Look at [Developer Guide](docs/DEVELOPER.md) for more details about how to start developing this repository.
-- Refer to [contributing guidelines](CONTRIBUTING.md) for the conventions and rules that contributors should follow.
+- Refer to [Contributing Guidelines](CONTRIBUTING.md) for the conventions and rules that contributors should follow.
 
 ## Project structure
 
@@ -31,10 +31,10 @@ AIoT_code/
 │   ├── utils.py                # RL-specific utility functions
 │   ├── train.py                # main code for training RL model
 │   └── config.json             # parameter settings for RL model
-├── time_series_model/          # LSTM related code and parameters
-│   ├── data/                   # LSTM-specific folder for storing data required for model training
-│   ├── models/                 # LSTM-specific folder for storing trained models
-│   ├── utils.py                # LSTM-specific utility functions
+├── time_series_model/          # RNN related code and parameters
+│   ├── data/                   # RNN-specific folder for storing data required for model training
+│   ├── models/                 # RNN-specific folder for storing trained models
+│   ├── utils.py                # RNN-specific utility functions
 │   ├── train.py                # main code for training LSTM model
 │   └── config.json             # parameter settings for LSTM model
 ├── deployment/                 # configuration for deployment
@@ -43,5 +43,7 @@ AIoT_code/
 │   ├── DEVELOPER.md            # developer guide
 │   └── editors/                # example configurations for editors
 ├── config.json                 # parameter settings for the overall project
+├── dashborad/                       
+│   ├── dashboard.py            # dashboard
 └── main.py
 ```
