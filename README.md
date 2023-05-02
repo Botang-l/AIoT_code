@@ -45,7 +45,5 @@ AIoT_code/
 ├── dashboard/                  # dashboard code
 │   ├── dashboard.py            # developer guide
 ├── config.json                 # parameter settings for the overall project
-├── dashborad/                       
-│   ├── dashboard.py            # dashboard
 └── main.py
 ```
