@@ -1,6 +1,6 @@
 # AIoT_code
-
 ## Development
+
 -   Clone this repo
     ```shell
     $ git clone https://github.com/Botang-l/AIoT_code
