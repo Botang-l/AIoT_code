@@ -17,7 +17,7 @@
     $ python3 main.py
     ```
 - Look at [Developer Guide](docs/DEVELOPER.md) for more details about how to start developing this repository.
-- Refer to [contributing guidelines](CONTRIBUTING.md) for the conventions and rules that contributors should follow.
+- Refer to [Contributing Guidelines](CONTRIBUTING.md) for the conventions and rules that contributors should follow.
 
 ## Project structure
 
@@ -44,6 +44,8 @@ AIoT_code/
 ├── docs/                       
 │   ├── DEVELOPER.md            # developer guide
 │   └── editors/                # example configurations for editors
+├── dashboard/                  # dashboard code
+│   ├── dashboard.py            # developer guide
 ├── config.json                 # parameter settings for the overall project
 └── main.py
 ```
