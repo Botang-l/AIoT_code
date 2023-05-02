@@ -43,7 +43,7 @@ AIoT_code/
 │   ├── DEVELOPER.md            # developer guide
 │   └── editors/                # example configurations for editors
 ├── dashboard/                  # dashboard code
-│   ├── dashboard.py            # developer guide
+│   ├── dashboard.py           
 ├── config.json                 # parameter settings for the overall project
 └── main.py
 ```
