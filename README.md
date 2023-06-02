@@ -57,7 +57,7 @@ AIoT_code/
     ```shell
     $ git checkout -b <NEW_BRANCH_NAME>
     ```
-3. 編輯完成後請以 `prettier` 進行 syntax check 及 auto format，倘若沒有錯誤再進行 commit
+3. 編輯完成後進行 commit
     ```shell
     $ git add .
     $ git commit -m "COMMIT_MSG"
@@ -69,7 +69,7 @@ AIoT_code/
     $ git checkout <NEW_BRANCH_NAME>
     $ git rebase develop
     ```
-5. 將新 branch 的修正與 develop 合併並 push 到 GitLab
+5. 將新 branch 的修正與 develop 合併並 push 到 Github
     ```shell
     $ git checkout develop
     $ git merge <NEW_BRANCH_NAME>
