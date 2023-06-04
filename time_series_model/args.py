@@ -3,6 +3,7 @@ import argparse
 
 def Temp_Model_args():
     parser = argparse.ArgumentParser()    # 創立parser物件
+    parser.add_argument('--name', default='Temp_Model', help='模型名稱')
     parser.add_argument('--model_path', default='./model/Temp_Model.pkl', help='模型存放位置')
     parser.add_argument('--epochs', type=int, default=100, help='訓練回合數')
     parser.add_argument('--batch_size', type=int, default=30, help='批次大小')
@@ -28,6 +29,7 @@ def Temp_Model_args():
 
 def PD_Model_args():
     parser = argparse.ArgumentParser()    # 創立parser物件
+    parser.add_argument('--name', default='PD_Model', help='模型名稱')
     parser.add_argument('--model_path', default='./model/PD_Model.pkl', help='模型存放位置')
     parser.add_argument('--epochs', type=int, default=10, help='訓練回合數')
     parser.add_argument('--batch_size', type=int, default=30, help='批次大小')
