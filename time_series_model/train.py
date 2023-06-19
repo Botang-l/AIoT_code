@@ -1,9 +1,14 @@
+import sys
+
+sys.path.append(r".")
 import torch
 from torch import nn
 import numpy as np
 from tqdm import tqdm
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from utils import device, get_val_loss, un_normalize_data, get_mape
+import matplotlib.pyplot as plt
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # LSTM
@@ -31,7 +36,96 @@ class LSTM(nn.Module):
         return pred
 
 
-def train(args, train_data, val_data):
+def un_normalize_data(y, pred, target_max, target_min):
+    """
+    Un-normalizes the given normalized data back to its original scale.
+
+    Args:
+        y: A numpy array representing the original target values.
+        pred: A numpy array representing the predicted values.
+        target_max: The maximum value of the target variable in the original scale.
+        target_min: The minimum value of the target variable in the original scale.
+
+    Returns:
+        The un-normalized original target values (y) and the un-normalized predicted values (pred).
+
+    """
+    y, pred = np.array(y), np.array(pred)
+    y = (target_max - target_min) * y + target_min
+    pred = (target_max - target_min) * pred + target_min
+
+    return y, pred
+
+
+def get_mape(y, pred):
+    """
+    Calculates the Mean Absolute Percentage Error (MAPE) between the target values and predicted values.
+
+    Args:
+        y: A numpy array representing the target values.
+        pred: A numpy array representing the predicted values.
+
+    Returns:
+        The MAPE value.
+
+    """
+
+    return np.mean(np.abs((y - pred) / y))
+
+
+def get_plot(model_name, y, pred):
+    """
+    Plots the line chart of y and pred.
+
+    Args:
+        model_name: A string representing the name of the model.
+        y: A list or array of true values.
+        pred: A list or array of predicted values.
+
+    Returns:
+        None
+    """
+
+    fig = plt.figure()
+    # 繪製 y 和 pred 的折線圖
+    x_range = range(len(y))
+    plt.plot(x_range, y, c='green', marker='*', ms=1, alpha=0.75, label='true')
+    plt.plot(x_range, pred, c='red', marker='o', ms=1, alpha=0.75, label='pred')
+
+    plt.title("result")
+    plt.xlabel("data")
+    plt.ylabel("value")
+    plt.legend()
+    plt.savefig(f'./time_series_model/result/LSTM_result_{model_name}.png')
+
+
+def get_val_loss(model, val_data, loss_function):
+    """
+    Computes the average validation loss for a given model and validation data.
+
+    Args:
+        model: The model for which to compute the validation loss.
+        val_data: The validation data (a DataLoader object).
+        loss_function: The loss function to compute the loss.
+
+    Returns:
+        The average validation loss.
+
+    """
+
+    model.eval()
+    val_loss = []
+    with torch.no_grad():
+        for seq, label in val_data:
+            seq, label = seq.to(device), label.to(device)
+            y_pred = model(seq)
+            loss = loss_function(y_pred, label)
+            val_loss.append(loss.item())
+
+    return np.mean(val_loss)
+
+
+def train(args, model_path, train_data, val_data):
     """
     Trains a model using the given training and validation data.
 
@@ -73,14 +167,15 @@ def train(args, train_data, val_data):
         scheduler.step(val_loss)
         train_loss_history.append(np.mean(train_loss))
         val_loss_history.append(val_loss)
-        print('epoch {:03d} train_loss {:.8f} val_loss {:.8f}'.format(epoch, np.mean(train_loss), val_loss))
+        if (epoch + 1) % 300 == 0:
+            print('epoch {:03d} train_loss {:.8f} val_loss {:.8f}'.format(epoch, np.mean(train_loss), val_loss))
 
     save_model = {'model': best_model}
-    torch.save(save_model, args.model_path)
+    torch.save(save_model, model_path)
 
 
 ## Test
-def test(args, test_data, m, n):
+def test(args, model_name, model_path, test_data, m, n):
     """
     Tests a trained model using the given test data.
 
@@ -99,7 +194,7 @@ def test(args, test_data, m, n):
                  args.num_layers,
                  args.output_size,
                  batch_size=args.batch_size).to(device)
-    model.load_state_dict(torch.load(args.model_path)['model'])
+    model.load_state_dict(torch.load(model_path)['model'])
     model.eval()
 
     print('Start predicting...')
@@ -115,9 +210,7 @@ def test(args, test_data, m, n):
     y, pred = un_normalize_data(y, pred, m, n)
 
     # Print results
-    print(f"y_shape: {len(y)}")
-    print(f"pred_shape: {len(pred)}")
     print(f"y_value: {y[:10]}")
     print(f"pred_value: {pred[:10]}")
     print(f"mape: {get_mape(y, pred)}")
-    get_plot(args.seq_len, y, pred)    # 顯示分析結果  ~get_plot
+    get_plot(model_name, y, pred)

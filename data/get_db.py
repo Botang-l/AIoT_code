@@ -86,7 +86,7 @@ def get_data_period(table, start_date, end_date):
         if conn:
             cur = conn.cursor()
             sql = "SELECT * FROM " + table + " WHERE " + col_name + " >= %s AND " + col_name + " <= %s"
-            cur.execute(sql, (f'{start_date}', f'{end_date}'))
+            cur.execute(sql, (f'{start_date}', f'{end_date}%'))
             resultall = cur.fetchall()
     except Exception as e:
         print(f"An error occurred: {e}")
