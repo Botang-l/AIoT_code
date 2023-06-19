@@ -40,48 +40,58 @@ def connect_aiot_db(dbName):
     return None
 
 
-###################################################################################
-
-
 def get_data(table, date_pick):
-    if table == 'CS_ncku' or table == 'CS_tmp':
+    resultall = []
+    conn = None
+
+    if table == 'CS_nor':
         conn = connect_icemachine_db('IoT')
         col_name = 'Date'
-    elif table == 'outdoor':
+    elif table in ['outdoor', 'indoor', 'pointer', 'controller']:
         conn = connect_aiot_db('aiot')
         col_name = 'TIMESTAMP'
     else:
-        conn = connect_aiot_db('aiot')
-        col_name = 'TIME_STAMP'
+        return resultall
+
     try:
-        cur = conn.cursor()
-        sql = "SELECT * FROM " + table + " WHERE " + col_name + " LIKE %s"    # = %s
-        cur.execute(sql, (f'{date_pick}%'))
-        resultall = cur.fetchall()
-        cur.close()
-        conn.close()
-    except:
-        pass
+        if conn:
+            cur = conn.cursor()
+            sql = "SELECT * FROM " + table + " WHERE " + col_name + " LIKE %s"
+            cur.execute(sql, (f'{date_pick}%',))
+            resultall = cur.fetchall()
+            cur.close()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        if conn:
+            conn.close()
+
     return resultall
 
 
 def get_data_period(table, start_date, end_date):
-    if table == 'CS_ncku' or table == 'CS_tmp':
+    resultall = []
+    conn = None
+
+    if table == 'CS_nor':
         conn = connect_icemachine_db('IoT')
         col_name = 'Date'
-    elif table == 'outdoor':
+    elif table in ['outdoor', 'indoor', 'pointer', 'controller']:
         conn = connect_aiot_db('aiot')
         col_name = 'TIMESTAMP'
     else:
-        conn = connect_aiot_db('aiot')
-        col_name = 'TIME_STAMP'
+        return resultall
+
     try:
-        cur = conn.cursor()
-        sql = "SELECT * FROM " + table + " WHERE " + col_name + " >= %s AND " + col_name + " <= %s"    # = %s
-        cur.execute(sql, (f'{start_date}%', f'{end_date}%'))    #date_pick
-        resultall = cur.fetchall()
-        cur.close()
-        conn.close()
-    except:
-        pass
+        if conn:
+            cur = conn.cursor()
+            sql = "SELECT * FROM " + table + " WHERE " + col_name + " >= %s AND " + col_name + " <= %s"
+            cur.execute(sql, (f'{start_date}', f'{end_date}'))
+            resultall = cur.fetchall()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        if conn:
+            conn.close()
+
     return resultall
