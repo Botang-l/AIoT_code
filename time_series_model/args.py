@@ -3,9 +3,9 @@ import argparse
 
 def Model_args():
     parser = argparse.ArgumentParser()    # 創立parser物件
-    parser.add_argument('--epochs', type=int, default=3000, help='訓練回合數')
+    parser.add_argument('--epochs', type=int, default=1000, help='訓練回合數')
     parser.add_argument('--batch_size', type=int, default=30, help='批次大小')
-    parser.add_argument('--seq_len', type=int, default=30, help='時序長度')
+    parser.add_argument('--seq_len', type=int, default=20, help='時序長度')
     # 調整-優化器
     parser.add_argument('--optimizer', type=str, default='adam', help='優化器種類')
     # ------ReduceLROnPlateau (loss不再下降才調整學習率)

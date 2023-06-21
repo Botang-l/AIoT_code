@@ -2,3 +2,4 @@ yapf
 pyright
 tqdm==4.65.0
 pymysql
+seasonal_decompose

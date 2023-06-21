@@ -381,12 +381,12 @@ def preprocess_seq(args, model_name, start_date, end_date):
 def Temp_Model(model_name, model_path, start_date, end_date):
     args = Model_args()
     Train_seq, Val_seq, Test_seq, train_max, train_min = preprocess_seq(args, model_name, start_date, end_date)
-    train(args, model_path, Train_seq, Val_seq)
+    # train(args, model_path, Train_seq, Val_seq)
     test(args, model_name, model_path, Test_seq, train_max, train_min)
 
 
 def PD_Model(model_name, model_path, start_date, end_date):
     args = Model_args()
     Train_seq, Val_seq, Test_seq, train_max, train_min = preprocess_seq(args, model_name, start_date, end_date)
-    train(args, model_path, Train_seq, Val_seq)
+    # train(args, model_path, Train_seq, Val_seq)
     test(args, model_name, model_path, Test_seq, train_max, train_min)
