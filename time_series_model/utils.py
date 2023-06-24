@@ -50,6 +50,35 @@ def filter_time(df):
     # 使用前一個非NaN值
     df = df.fillna(method='ffill')
 
+    # holidays = [
+    #     pd.to_datetime("2023-06-17"),
+    #     pd.to_datetime("2023-06-18"),
+    #     pd.to_datetime("2023-06-22"),
+    #     pd.to_datetime("2023-06-23"),
+    #     pd.to_datetime("2023-06-24"),
+    #     pd.to_datetime("2023-06-25"),
+    #     pd.to_datetime("2023-07-01"),
+    #     pd.to_datetime("2023-07-02"),
+    # ]
+    # # 將 'date' 欄位轉換為時間格式
+    # df['Date'] = pd.to_datetime(df['Date'])
+
+    # #去掉假日的資料
+    # df = df[~df['Date'].dt.floor('D').isin(holidays)]
+    # df.set_index('Date', inplace=True)
+
+    # # 以每 1 分鐘為間隔重新獲得資料
+    # df = df.resample('1T').first()
+
+    # # #去掉每天下班後的資料
+    # df = df.between_time('08:00:00', '17:00:00')
+
+    # # 去除空行
+    # df = df.dropna(axis=0, how='any')
+
+    # # 使用前一個非NaN值
+    # df = df.fillna(method='ffill')
+
     return df
 
 
@@ -211,14 +240,14 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
     print(chiller_data)
     if (model_name == 'Temp_Model'):
         # merge
-        dataset = indoor_data.merge(outdoor_data, on='Date', how='outer')
-        dataset = dataset.merge(controller_data, on='Date', how='outer')
-        dataset = dataset.merge(chiller_data, on='Date', how='outer')
+        dataset = indoor_data.merge(outdoor_data, on='Date', how='left')
+        dataset = dataset.merge(controller_data, on='Date', how='left')
+        dataset = dataset.merge(chiller_data, on='Date', how='left')
         dataset = seasonal_decomp(seq_len, dataset, 'temp')
     else:
-        dataset = chiller_data.merge(indoor_data, on='Date', how='outer')
-        dataset = dataset.merge(controller_data, on='Date', how='outer')
-        dataset = dataset.merge(outdoor_data, on='Date', how='outer')
+        dataset = chiller_data.merge(indoor_data, on='Date', how='left')
+        dataset = dataset.merge(controller_data, on='Date', how='left')
+        dataset = dataset.merge(outdoor_data, on='Date', how='left')
         dataset = seasonal_decomp(seq_len, dataset, 'PM-3133_AI.Kwh')
     dataset = dataset.fillna(method='ffill')
     # 第一天沒有開啟冷氣機時的數值更改
@@ -314,7 +343,14 @@ def create_seq(input_size, seq_len, data):
 
         data_label = [target[i + seq_len]]
         final_seq.append((torch.FloatTensor(data_seq), torch.FloatTensor(data_label)))
+    print(f'seq_len: {seq_len}')
+    print(f'總列數: ({len(other)}, {len(other[0])})')
+    print(f'序列化_seq_data: ({len(final_seq)}, {len(final_seq[0])})\n')
 
+    (a, b) = final_seq[0]
+    print("示範:")
+    print("seq:", a)
+    print("label:", b, "\n----------------------------\n")
     return final_seq
 
 

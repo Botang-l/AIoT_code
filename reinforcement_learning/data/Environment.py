@@ -19,7 +19,7 @@ b = (s + f) // 2
 # 環境類別
 class Environment:    
     def __init__(self, num=2): # 初始化       
-        self.__state = [b] # 玩家一開始站中間位置
+        self.__state = [b, 0] # 玩家一開始站中間位置
         self.__totalReward = 0 
         self.action_space = ActionSpace(num)
         self.actionlist = []
@@ -42,20 +42,21 @@ class Environment:
         elif self.__state[0] == f:
             reward = 2
         elif self.__state[0] == f-2:
-            reward = 2
+            reward = 0.1
         else:    
             if(action):
-                reward = -0.3
+                reward = -0.01
             else:
-                reward = 0.2
+                reward = -0.01
         self.__totalReward += reward
         # print(f"累計報酬: {self.totalReward:.4f}")
         # print('現在位置', self.state[0])
         # print('-'*20)
+        self.__state[1] += 1
         return self.__state, reward, self.is_done(), False, 0
 
     def reset(self):
-        self.__state = [b] # 玩家一開始站中間位置
+        self.__state = [b, 0] # 玩家一開始站中間位置
         self.__totalReward = 0
         self.actionlist = []
         

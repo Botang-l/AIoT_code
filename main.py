@@ -4,7 +4,7 @@ from datetime import date
 if __name__ == '__main__':
     # 指定時間區段
     start_date = date(2023, 6, 14)
-    end_date = date(2023, 6, 20)
+    end_date = date(2023, 6, 21)
 
     #模型名稱
     model_name = 'Temp_Model'
@@ -13,6 +13,7 @@ if __name__ == '__main__':
 
     # 訓練預測溫度模型
     Temp_Model(model_name, model_path, start_date, end_date)
+
     #模型名稱
     model_name = 'PD_Model'
     #儲存模型位置

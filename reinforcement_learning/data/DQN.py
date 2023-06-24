@@ -26,8 +26,11 @@ for i in range(1):
         print('-'*10)
         state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
         for t in count():
-            if(t > 100):
+            if(t > 99):
                 break
+            if(t > 90):
+            #     state[0][1] = t
+                print(state)
             action = select_action(state)
             observation, reward, terminated, truncated, _ = env.step(action.item())
             reward = torch.tensor([reward], device=device)
