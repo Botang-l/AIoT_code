@@ -9,7 +9,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 import matplotlib.pyplot as plt
 import math
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+from . import args
 
 # LSTM
 class LSTM(nn.Module):
@@ -228,7 +228,7 @@ def get_val_loss(model, val_data, loss_function):
     return np.mean(val_loss)
 
 
-def train(args, model_path, train_data, val_data):
+def train(model_path, train_data, val_data):
     """
     Trains a model using the given training and validation data.
 
@@ -278,7 +278,7 @@ def train(args, model_path, train_data, val_data):
 
 
 ## Test
-def test(args, model_name, model_path, test_data, m, n):
+def test(model_name, model_path, test_data, m, n):
     """
     Tests a trained model using the given test data.
 

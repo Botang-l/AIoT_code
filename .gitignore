@@ -3,7 +3,9 @@
 ### Interdisciplinary Talent Hub ###
 # Configuration
 config.json
-
+test.py
+test.ipynb
+*.csv
 ### Database ###
 *.accdb
 *.db

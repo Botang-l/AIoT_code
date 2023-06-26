@@ -29,3 +29,10 @@ class ReplayMemory(object):
 
     def __len__(self):
         return len(self.memory)
+    
+
+class LSTMdata(object):
+    def __init__(self, capacity):
+        self.memory = deque([], maxlen=capacity)
+        
+    

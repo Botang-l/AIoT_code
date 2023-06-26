@@ -18,7 +18,7 @@ b = (s + f) // 2
 
 # 環境類別
 class Environment:    
-    def __init__(self, num=2): # 初始化       
+    def __init__(self, LSTM, num=2): # 初始化       
         self.__state = [b, 0] # 玩家一開始站中間位置
         self.__totalReward = 0 
         self.action_space = ActionSpace(num)
@@ -31,6 +31,9 @@ class Environment:
         # 是否走到左右端點
         return self.__state[0] == s or self.__state[0] == f
 
+    # def step(self, action):
+    #     self.actionlist.append(action)
+        
     # 步驟
     def step(self, action):
         # 是否回合已結束    
