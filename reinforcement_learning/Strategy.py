@@ -1,6 +1,5 @@
 import math
-import torch
-from args import *
+from . import *
 
 def select_action(state):
     global steps_done

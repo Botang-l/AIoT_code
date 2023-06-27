@@ -188,7 +188,6 @@ def normalize_data(data, max_min_vals):
     min_vals = max_min_vals[:, 1]
     normalized_data = (data - min_vals) / (max_vals - min_vals)
     normalized_data = normalized_data.fillna(0)
-    print(data.to_csv('fuck.csv'))
     
     return normalized_data.values, max_min_vals[0][0], max_min_vals[0][1]
 

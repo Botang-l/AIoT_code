@@ -2,12 +2,12 @@ import gymnasium as gym
 import torch
 import torch.optim as optim
 
-from Memory import *
-from Model import *
-from Environment import *
+from .Memory import *
+from .Model import *
+from .Environment import *
 import configparser
 import sys
-
+import os
 
 # if GPU is to be used
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -16,7 +16,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 env = Environment()
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read(os.path.join(os.path.dirname(__file__),'config.ini'))
 
 args = sys.argv
 arg = args[-1] if(len(args) == 2) else 'DEFAULT'

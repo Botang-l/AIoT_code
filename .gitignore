@@ -1,11 +1,12 @@
 # https://github.com/github/gitignore
-
-### Interdisciplinary Talent Hub ###
-# Configuration
-config.json
+# nonsense file
 test.py
 test.ipynb
 *.csv
+### Interdisciplinary Talent Hub ###
+# Configuration
+config.json
+
 ### Database ###
 *.accdb
 *.db
