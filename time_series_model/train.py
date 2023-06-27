@@ -8,8 +8,9 @@ from tqdm import tqdm
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import matplotlib.pyplot as plt
 import math
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-from . import args
+
 
 # LSTM
 class LSTM(nn.Module):
@@ -35,6 +36,7 @@ class LSTM(nn.Module):
 
         return pred
 
+
 class GRU(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, output_size, batch_size):
         super().__init__()
@@ -44,16 +46,17 @@ class GRU(nn.Module):
         self.output_size = output_size
         self.batch_size = batch_size
 
-        self.rnn = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first = True)
+        self.rnn = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True)
         self.fc = nn.Linear(self.hidden_size, self.output_size)
-    
+
     def forward(self, input_seq):
         batch_size, seq_len = input_seq.shape[0], input_seq.shape[1]
         h_0 = torch.zeros(self.num_layers, batch_size, self.hidden_size).to(device)
         output, _ = self.rnn(input_seq, (h_0))
-        pred = self.fc(output[:, -1 ,:])
+        pred = self.fc(output[:, -1, :])
 
-        return pred 
+        return pred
+
 
 class TPA_LSTM(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, output_size, batch_size):
@@ -65,25 +68,14 @@ class TPA_LSTM(nn.Module):
         self.num_directions = 1
         self.batch_size = batch_size
 
-        self.lstm = nn.LSTM(
-            self.input_size,
-            self.hidden_size,
-            self.num_layers,
-            batch_first=True
-        )
-        self.attention = nn.Sequential(
-            nn.Linear(self.hidden_size, 1),
-            nn.Tanh(),
-            nn.Softmax(dim=1)
-        )
+        self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, batch_first=True)
+        self.attention = nn.Sequential(nn.Linear(self.hidden_size, 1), nn.Tanh(), nn.Softmax(dim=1))
         self.linear = nn.Linear(self.hidden_size, self.output_size)
 
     def forward(self, input_seq):
         batch_size, seq_len = input_seq.shape[0], input_seq.shape[1]
-        h_0 = torch.randn(self.num_directions * self.num_layers,
-                          batch_size, self.hidden_size).to(device)
-        c_0 = torch.randn(self.num_directions * self.num_layers,
-                          batch_size, self.hidden_size).to(device)
+        h_0 = torch.randn(self.num_directions * self.num_layers, batch_size, self.hidden_size).to(device)
+        c_0 = torch.randn(self.num_directions * self.num_layers, batch_size, self.hidden_size).to(device)
         # output(batch_size, seq_len, num_directions * hidden_size)
         output, _ = self.lstm(input_seq, (h_0, c_0))
         # attention_weights(batch_size, seq_len, 1)
@@ -95,6 +87,7 @@ class TPA_LSTM(nn.Module):
         # pred(batch_size, output_size)
         pred = self.linear(aggregated_output)
         return pred
+
 
 def un_normalize_data(y, pred, target_max, target_min):
     """
@@ -132,6 +125,7 @@ def get_mape(y, pred):
 
     return np.mean(np.abs((y - pred) / y))
 
+
 def get_plot(model_name, y, pred):
     """
     Plots the line chart of y and pred.
@@ -164,42 +158,20 @@ def get_plot(model_name, y, pred):
         plt.ylabel("Value")
         plt.legend()
         plt.savefig(f'./time_series_model/result/{model_name}/part_result_{model_name}_{i}.png')
-    fig1 = plt.figure()
-    # 繪製 y 和 pred 的折線圖
+        plt.close(fig)  # Close the figure to free up memory
+
+    fig = plt.figure()
+    # Plot y and pred line chart for the full data
     x_range = range(len(y))
     plt.plot(x_range, y, c='green', marker='*', ms=1, alpha=0.75, label='true')
     plt.plot(x_range, pred, c='red', marker='o', ms=1, alpha=0.75, label='pred')
 
-    plt.title("result")
-    plt.xlabel("data")
-    plt.ylabel("value")
+    plt.title("Result")
+    plt.xlabel("Data")
+    plt.ylabel("Value")
     plt.legend()
     plt.savefig(f'./time_series_model/result/LSTM_result_{model_name}.png')
-
-# def get_plot(model_name, y, pred):
-#     """
-#     Plots the line chart of y and pred.
-
-#     Args:
-#         model_name: A string representing the name of the model.
-#         y: A list or array of true values.
-#         pred: A list or array of predicted values.
-
-#     Returns:
-#         None
-#     """
-
-#     fig = plt.figure()
-#     # 繪製 y 和 pred 的折線圖
-#     x_range = range(len(y))
-#     plt.plot(x_range, y, c='green', marker='*', ms=1, alpha=0.75, label='true')
-#     plt.plot(x_range, pred, c='red', marker='o', ms=1, alpha=0.75, label='pred')
-
-#     plt.title("result")
-#     plt.xlabel("data")
-#     plt.ylabel("value")
-#     plt.legend()
-#     plt.savefig(f'./time_series_model/result/LSTM_result_{model_name}.png')
+    plt.close(fig)  # Close the figure to free up memory
 
 
 def get_val_loss(model, val_data, loss_function):
@@ -228,7 +200,7 @@ def get_val_loss(model, val_data, loss_function):
     return np.mean(val_loss)
 
 
-def train(model_path, train_data, val_data):
+def train(args, model_path, train_data, val_data):
     """
     Trains a model using the given training and validation data.
 
@@ -278,7 +250,7 @@ def train(model_path, train_data, val_data):
 
 
 ## Test
-def test(model_name, model_path, test_data, m, n):
+def test(args, model_name, model_path, test_data, m, n):
     """
     Tests a trained model using the given test data.
 

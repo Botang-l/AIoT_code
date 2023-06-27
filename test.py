@@ -6,7 +6,6 @@ if __name__ == '__main__':
     # start_date = date(2023, 6, 20)
     # end_date = date(2023, 6, 20)
 
-    
     # #模型名稱
     # model_name = 'Temp_Model'
     # #儲存模型位置
@@ -25,7 +24,7 @@ if __name__ == '__main__':
     # # 訓練預測功耗模型
     # PD_Model(model_name, model_path, PD_data, start_date, end_date)
     # firstData = PD_data.displayFirstData()
-    
+
     # path = 'time_series_model/model/PD_Model.pkl'
     # loaded_model = torch.load(path)
     # model = loaded_model['model']
@@ -33,5 +32,3 @@ if __name__ == '__main__':
     from reinforcement_learning.DQN import dqn
     import torch
     dqn()
-    
-

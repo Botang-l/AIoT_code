@@ -16,10 +16,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 env = Environment()
 
 config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__),'config.ini'))
+config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
 
 args = sys.argv
-arg = args[-1] if(len(args) == 2) else 'DEFAULT'
+arg = args[-1] if (len(args) == 2) else 'DEFAULT'
 
 try:
     print('使用', arg, '作為超參數')

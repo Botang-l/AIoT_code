@@ -1,6 +1,7 @@
 import math
 from . import *
 
+
 def select_action(state):
     global steps_done
     sample = random.random()
@@ -16,8 +17,9 @@ def select_action(state):
     else:
         return torch.tensor([[env.action_space.sample()]], device=device, dtype=torch.long)
 
+
 def optimize_model():
-     
+
     if len(memory) < BATCH_SIZE:
         return
     transitions = memory.sample(BATCH_SIZE)
@@ -30,11 +32,14 @@ def optimize_model():
 
     # Compute a mask of non-final states and concatenate the batch elements
     # (a final state would've been the one after which simulation ended)
-    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
-                                          batch.next_state)), device=device, dtype=torch.bool)
+    non_final_mask = torch.tensor(
+        tuple(map(lambda s: s is not None,
+                  batch.next_state)),
+        device=device,
+        dtype=torch.bool
+    )
     #print(non_final_mask)
-    non_final_next_states = torch.cat([s for s in batch.next_state
-                                                if s is not None])
+    non_final_next_states = torch.cat([s for s in batch.next_state if s is not None])
     #print(non_final_next_states)
     state_batch = torch.cat(batch.state)
     action_batch = torch.cat(batch.action)
@@ -68,5 +73,3 @@ def optimize_model():
     # In-place gradient clipping
     torch.nn.utils.clip_grad_value_(policy_net.parameters(), 100)
     optimizer.step()
-
-

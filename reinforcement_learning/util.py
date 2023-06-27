@@ -2,13 +2,13 @@ import torch
 import matplotlib
 import matplotlib.pyplot as plt
 
-
 # set up matplotlib
 is_ipython = 'inline' in matplotlib.get_backend()
 if is_ipython:
     from IPython import display
 
 plt.ion()
+
 
 def plot_durations(episode_durations, show_result=False):
     plt.figure(1)
@@ -27,7 +27,7 @@ def plot_durations(episode_durations, show_result=False):
         means = torch.cat((torch.zeros(99), means))
         plt.plot(means.numpy())
 
-    plt.pause(0.001)  # pause a bit so that plots are updated
+    plt.pause(0.001)    # pause a bit so that plots are updated
     if is_ipython:
         if not show_result:
             display.display(plt.gcf())
