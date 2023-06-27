@@ -5,7 +5,7 @@ import torch
 if __name__ == '__main__':
     # 指定時間區段
     start_date = date(2023, 6, 14)
-    end_date = date(2023, 6, 21)
+    end_date = date(2023, 6, 26)
 
     
     #模型名稱

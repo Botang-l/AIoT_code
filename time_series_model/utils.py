@@ -340,19 +340,30 @@ class TimeSeriesData:
             dataset = dataset.merge(controller_data, on='Date', how='left')
             dataset = dataset.merge(chiller_data, on='Date', how='left')
             dataset = seasonal_decomp(seq_len, dataset, 'temp')
+            # 第一天沒有開啟冷氣機時的數值更改
+            dataset.loc[np.isnan(dataset['I_O']), 'ac_temp'] = 0
+            dataset.loc[np.isnan(dataset['I_O']), 'fan'] = 3
+            dataset.loc[np.isnan(dataset['I_O']), 'mode'] = 3
+            dataset.loc[np.isnan(dataset['I_O']), 'I_O'] = 0
+            dataset = dataset[['temp', 'PM-3133_AI.Kwh', 'ac_temp', 'CO2', 'trend', 'seasonal', 'residual']]
         else:
             dataset = chiller_data.merge(indoor_data, on='Date', how='left')
             dataset = dataset.merge(controller_data, on='Date', how='left')
             dataset = dataset.merge(outdoor_data, on='Date', how='left')
             dataset = seasonal_decomp(seq_len, dataset, 'PM-3133_AI.Kwh')
+            # 第一天沒有開啟冷氣機時的數值更改
+            dataset.loc[np.isnan(dataset['I_O']), 'ac_temp'] = 0
+            dataset.loc[np.isnan(dataset['I_O']), 'fan'] = 3
+            dataset.loc[np.isnan(dataset['I_O']), 'mode'] = 3
+            dataset.loc[np.isnan(dataset['I_O']), 'I_O'] = 0
+            dataset = dataset[['PM-3133_AI.Kwh', 'temp', 'ac_temp', 'CO2', 'trend', 'seasonal', 'residual']]
         dataset = dataset.fillna(method='ffill')
-        # 第一天沒有開啟冷氣機時的數值更改
-        dataset.loc[np.isnan(dataset['I_O']), 'ac_temp'] = 0
-        dataset.loc[np.isnan(dataset['I_O']), 'fan'] = 3
-        dataset.loc[np.isnan(dataset['I_O']), 'mode'] = 3
-        dataset.loc[np.isnan(dataset['I_O']), 'I_O'] = 0
+        
+        
         print(dataset.isnull().any().any())
+        print("aaaaaaaaaaaaaaaaaaa")
         print(dataset)
+        # dataset.to_csv('fuck.csv')
         return dataset
     
 
@@ -442,14 +453,13 @@ class TimeSeriesData:
 
 
 def Temp_Model(model_name, model_path, data, start_date, end_date):
-    
     Train_seq, Val_seq, Test_seq, train_max, train_min = data.displayData()
-    # train(args, model_path, Train_seq, Val_seq)
+    train(model_path, Train_seq, Val_seq)
     test(model_name, model_path, Test_seq, train_max, train_min)
  
 
 def PD_Model(model_name, model_path, data, start_date, end_date):
     Train_seq, Val_seq, Test_seq, train_max, train_min = data.displayData()
-    # train(args, model_path, Train_seq, Val_seq)
+    train(model_path, Train_seq, Val_seq)
     test(model_name, model_path, Test_seq, train_max, train_min)
 

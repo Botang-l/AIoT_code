@@ -132,50 +132,6 @@ def get_mape(y, pred):
 
     return np.mean(np.abs((y - pred) / y))
 
-# def get_plot(model_name, y, pred):
-#     """
-#     Plots the line chart of y and pred.
-
-#     Args:
-#         model_name: A string representing the name of the model.
-#         y: A list or array of true values.
-#         pred: A list or array of predicted values.
-
-#     Returns:
-#         None
-#     """
-
-#     num_plots = math.ceil(len(y) / 100)
-
-#     for i in range(num_plots):
-#         start = i * 100
-#         end = min(start + 100, len(y))  # Adjust the end index to handle the last segment
-
-#         fig = plt.figure()
-#         # Plot y and pred line chart
-#         x_range = range(start, end)
-#         y_slice = y[start:end]
-#         pred_slice = pred[start:end]
-#         plt.plot(x_range[:len(y_slice)], y_slice, c='green', marker='*', ms=1, alpha=0.75, label='true')
-#         plt.plot(x_range[:len(pred_slice)], pred_slice, c='red', marker='o', ms=1, alpha=0.75, label='pred')
-
-#         plt.title("Result")
-#         plt.xlabel("Data")
-#         plt.ylabel("Value")
-#         plt.legend()
-#         plt.savefig(f'./time_series_model/result/{model_name}/part_result_{model_name}_{i}.png')
-#     fig1 = plt.figure()
-#     # 繪製 y 和 pred 的折線圖
-#     x_range = range(len(y))
-#     plt.plot(x_range, y, c='green', marker='*', ms=1, alpha=0.75, label='true')
-#     plt.plot(x_range, pred, c='red', marker='o', ms=1, alpha=0.75, label='pred')
-
-#     plt.title("result")
-#     plt.xlabel("data")
-#     plt.ylabel("value")
-#     plt.legend()
-#     plt.savefig(f'./time_series_model/result/LSTM_result_{model_name}.png')
-
 def get_plot(model_name, y, pred):
     """
     Plots the line chart of y and pred.
@@ -189,7 +145,26 @@ def get_plot(model_name, y, pred):
         None
     """
 
-    fig = plt.figure()
+    num_plots = math.ceil(len(y) / 100)
+
+    for i in range(num_plots):
+        start = i * 100
+        end = min(start + 100, len(y))  # Adjust the end index to handle the last segment
+
+        fig = plt.figure()
+        # Plot y and pred line chart
+        x_range = range(start, end)
+        y_slice = y[start:end]
+        pred_slice = pred[start:end]
+        plt.plot(x_range[:len(y_slice)], y_slice, c='green', marker='*', ms=1, alpha=0.75, label='true')
+        plt.plot(x_range[:len(pred_slice)], pred_slice, c='red', marker='o', ms=1, alpha=0.75, label='pred')
+
+        plt.title("Result")
+        plt.xlabel("Data")
+        plt.ylabel("Value")
+        plt.legend()
+        plt.savefig(f'./time_series_model/result/{model_name}/part_result_{model_name}_{i}.png')
+    fig1 = plt.figure()
     # 繪製 y 和 pred 的折線圖
     x_range = range(len(y))
     plt.plot(x_range, y, c='green', marker='*', ms=1, alpha=0.75, label='true')
@@ -200,6 +175,31 @@ def get_plot(model_name, y, pred):
     plt.ylabel("value")
     plt.legend()
     plt.savefig(f'./time_series_model/result/LSTM_result_{model_name}.png')
+
+# def get_plot(model_name, y, pred):
+#     """
+#     Plots the line chart of y and pred.
+
+#     Args:
+#         model_name: A string representing the name of the model.
+#         y: A list or array of true values.
+#         pred: A list or array of predicted values.
+
+#     Returns:
+#         None
+#     """
+
+#     fig = plt.figure()
+#     # 繪製 y 和 pred 的折線圖
+#     x_range = range(len(y))
+#     plt.plot(x_range, y, c='green', marker='*', ms=1, alpha=0.75, label='true')
+#     plt.plot(x_range, pred, c='red', marker='o', ms=1, alpha=0.75, label='pred')
+
+#     plt.title("result")
+#     plt.xlabel("data")
+#     plt.ylabel("value")
+#     plt.legend()
+#     plt.savefig(f'./time_series_model/result/LSTM_result_{model_name}.png')
 
 
 def get_val_loss(model, val_data, loss_function):
