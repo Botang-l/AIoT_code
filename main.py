@@ -4,8 +4,8 @@ import torch
 
 if __name__ == '__main__':
     # 指定時間區段
-    start_date = date(2023, 6, 14)
-    end_date = date(2023, 6, 26)
+    start_date = date(2023, 6, 15)
+    end_date = date(2023, 6, 30)
 
     #模型名稱
     model_name = 'Temp_Model'
@@ -20,8 +20,3 @@ if __name__ == '__main__':
     model_path = 'time_series_model/model/PD_Model.pkl'
     # 訓練預測功耗模型
     final_seq = PD_Model(model_name, model_path, start_date, end_date)
-
-    # path = 'time_series_model/model/PD_Model.pkl'
-    # loaded_model = torch.load(path)
-    # model = loaded_model['model']
-    # model.eval()

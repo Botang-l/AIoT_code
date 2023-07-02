@@ -8,7 +8,6 @@ from tqdm import tqdm
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import matplotlib.pyplot as plt
 import math
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -89,6 +88,30 @@ class TPA_LSTM(nn.Module):
         return pred
 
 
+from torch.nn import Transformer
+
+class TPA_Transformer(nn.Module):
+    def __init__(self, input_size, hidden_size, num_layers, output_size, batch_size):
+        super().__init__()
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.output_size = output_size
+        self.batch_size = batch_size
+
+
+        self.linear_emb = nn.Linear(input_size, hidden_size)  # 新增的線性層
+        self.transformer = Transformer(d_model=hidden_size, nhead=8, num_encoder_layers=num_layers)
+        self.linear = nn.Linear(hidden_size, output_size)
+
+    def forward(self, input_seq):
+        transformer_output = self.transformer(input_seq)
+        print(transformer_output)
+        transformer_output = transformer_output.permute(1, 0, 2)  # (batch_size, seq_len, hidden_size)
+        pred = self.linear(transformer_output[:, -1, :])
+        return pred
+
+
 def un_normalize_data(y, pred, target_max, target_min):
     """
     Un-normalizes the given normalized data back to its original scale.
@@ -141,30 +164,36 @@ def get_plot(model_name, y, pred):
 
     num_plots = math.ceil(len(y) / 100)
 
-    for i in range(num_plots):
-        start = i * 100
-        end = min(start + 100, len(y))  # Adjust the end index to handle the last segment
+    if((model_name != 'Temp_Model_loss') and (model_name != 'PD_Model_loss')):
+        for i in range(num_plots):
+            start = i * 100
+            end = min(start + 100, len(y))  # Adjust the end index to handle the last segment
 
-        fig = plt.figure()
-        # Plot y and pred line chart
-        x_range = range(start, end)
-        y_slice = y[start:end]
-        pred_slice = pred[start:end]
-        plt.plot(x_range[:len(y_slice)], y_slice, c='green', marker='*', ms=1, alpha=0.75, label='true')
-        plt.plot(x_range[:len(pred_slice)], pred_slice, c='red', marker='o', ms=1, alpha=0.75, label='pred')
+            fig = plt.figure()
+            # Plot y and pred line chart
+            x_range = range(start, end)
+            y_slice = y[start:end]
+            pred_slice = pred[start:end]
+            
+            plt.plot(x_range[:len(y_slice)], y_slice, c='green', marker='*', ms=1, alpha=0.75, label='true')
+            plt.plot(x_range[:len(pred_slice)], pred_slice, c='red', marker='o', ms=1, alpha=0.75, label='pred')
 
-        plt.title("Result")
-        plt.xlabel("Data")
-        plt.ylabel("Value")
-        plt.legend()
-        plt.savefig(f'./time_series_model/result/{model_name}/part_result_{model_name}_{i}.png')
-        plt.close(fig)  # Close the figure to free up memory
+            plt.title("Result")
+            plt.xlabel("Data")
+            plt.ylabel("Value")
+            plt.legend()
+            plt.savefig(f'./time_series_model/result/{model_name}/part_result_{model_name}_{i}.png')
+            plt.close(fig)  # Close the figure to free up memory
 
     fig = plt.figure()
     # Plot y and pred line chart for the full data
     x_range = range(len(y))
-    plt.plot(x_range, y, c='green', marker='*', ms=1, alpha=0.75, label='true')
-    plt.plot(x_range, pred, c='red', marker='o', ms=1, alpha=0.75, label='pred')
+    if((model_name == 'Temp_Model_loss') or (model_name == 'PD_Model_loss')):
+        plt.plot(x_range, y, c='green', marker='*', ms=1, alpha=0.75, label='train')
+        plt.plot(x_range, pred, c='red', marker='o', ms=1, alpha=0.75, label='validation')
+    else:
+        plt.plot(x_range, y, c='green', marker='*', ms=1, alpha=0.75, label='true')
+        plt.plot(x_range, pred, c='red', marker='o', ms=1, alpha=0.75, label='pred')
 
     plt.title("Result")
     plt.xlabel("Data")
@@ -200,7 +229,7 @@ def get_val_loss(model, val_data, loss_function):
     return np.mean(val_loss)
 
 
-def train(args, model_path, train_data, val_data):
+def train(args, model_name, model_path, train_data, val_data):
     """
     Trains a model using the given training and validation data.
 
@@ -221,7 +250,6 @@ def train(args, model_path, train_data, val_data):
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=args.factor, patience=args.patience, verbose=True)
     min_epochs, min_val_loss, best_model = 5, float('inf'), None
     train_loss_history, val_loss_history = [], []
-
     for epoch in tqdm(range(args.epochs)):
         train_loss = []
         model.train()
@@ -244,7 +272,9 @@ def train(args, model_path, train_data, val_data):
         val_loss_history.append(val_loss)
         if (epoch + 1) % 100 == 0:
             print('epoch {:03d} train_loss {:.8f} val_loss {:.8f}'.format(epoch, np.mean(train_loss), val_loss))
-
+    
+    # Print results
+    get_plot(model_name+'_loss', train_loss_history, val_loss_history)
     save_model = {'model': model}
     torch.save(save_model, model_path)
 

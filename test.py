@@ -1,4 +1,3 @@
-from time_series_model.utils import Temp_Model, PD_Model, TimeSeriesData
 from datetime import date
 
 if __name__ == '__main__':
@@ -30,5 +29,10 @@ if __name__ == '__main__':
     # model = loaded_model['model']
     # model.eval()
     from reinforcement_learning.DQN import dqn
+    from reinforcement_learning.util import RL_model
+    from time_series_model.utils import getRLdata
     import torch
+    start_date = date(2023, 6, 26)
+    end_date = date(2023, 6, 26)
+    getRLdata(start_date, end_date)
     dqn()

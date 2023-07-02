@@ -1,6 +1,5 @@
 from collections import namedtuple, deque
 import torch
-import copy
 import random
 
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
@@ -28,7 +27,8 @@ class ReplayMemory(object):
     def __len__(self):
         return len(self.memory)
 
-class LSTMdata(object):
+
+class ACData(object):
     def __init__(self, data):
         _, w, _ = data.shape
         self.__data = deque([], maxlen= w)
@@ -54,10 +54,12 @@ class LSTMdata(object):
         for i in range(1, l):
             self.push_in_stock(data[i][-1])
     
+    def isEmpty(self):
+        return(len(self.__data_in_stock) == 0)
+
     # 取得 RL 需要的當筆 data
     def load_RLdata(self):
         temp = self.__data[-1]
-        print(temp)
         RLdata = torch.cat((temp[:2], temp[3:]))
         return(RLdata)
     
@@ -67,11 +69,10 @@ class LSTMdata(object):
 
     # 取得 Time Series Model 需要的單筆 data
     def load_TSdata(self):
-        print(list(self.__data))
         Tdata = torch.stack(list(self.__data))
-        PDdata = copy.deepcopy(Tdata)
+        PDdata = Tdata.clone()
         PDdata[:, [0, 1]] = PDdata[:, [1, 0]]
-        return(Tdata, PDdata)
+        return(Tdata.unsqueeze(0), PDdata.unsqueeze(0))
 
     # 將 Time Series Model 所生成的 data 是下一個時間點的變化量。
     # 我們從 __data_in_stock 取得第一筆資料(即下一個時間點的變化量後)，並刪除 __data_in_stock該筆資料。
@@ -82,4 +83,6 @@ class LSTMdata(object):
         temp[1] = PDdata
         self.push(temp)
         self.__data_in_stock.popleft()
+
+    
         

@@ -14,9 +14,12 @@ def select_action(state):
             # second column on max result is index of where max element was
             # found, so we pick action with the larger expected reward.
             return policy_net(state).max(1)[1].view(1, 1)
+        
     else:
         return torch.tensor([[env.action_space.sample()]], device=device, dtype=torch.long)
 
+def steps_():
+    return(steps_done)
 
 def optimize_model():
 
