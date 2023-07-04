@@ -42,43 +42,37 @@ def filter_time(df):
         A modified DataFrame with the filtered data.
     """
     # 將 'date' 欄位轉換為時間格式
-    df['Date'] = pd.to_datetime(df['Date'])
+    #df['Date'] = pd.to_datetime(df['Date'])
 
     # 以每 1 分鐘為間隔重新獲得資料
-    df = df.resample('1T', on='Date').first()
+    #df = df.resample('1T', on='Date').first()
+
+    # 使用前一個非NaN值
+    #df = df.fillna(method='ffill')
+    holidays = [
+        pd.to_datetime("2023-06-17"),
+        pd.to_datetime("2023-06-18"),
+        pd.to_datetime("2023-06-22"),
+        pd.to_datetime("2023-06-23"),
+        pd.to_datetime("2023-06-24"),
+        pd.to_datetime("2023-06-25"),
+        pd.to_datetime("2023-07-01"),
+        pd.to_datetime("2023-07-02"),
+    ]
+    # 將 'date' 欄位轉換為時間格式
+    df['Date'] = pd.to_datetime(df['Date'])
+    # 去掉假日的資料
+    df = df[~df['Date'].dt.floor('D').isin(holidays)]
+    df.set_index('Date', inplace=True)
+    # 以每 1 分鐘為間隔重新獲得資料
+    df = df.resample('1T').first()
+    # #去掉每天下班後的資料
+    df = df.between_time('08:00:00', '18:00:00')
+    # 去除空行
+    # df = df.dropna(axis=0, how='any')
 
     # 使用前一個非NaN值
     df = df.fillna(method='ffill')
-
-    # holidays = [
-    #     pd.to_datetime("2023-06-17"),
-    #     pd.to_datetime("2023-06-18"),
-    #     pd.to_datetime("2023-06-22"),
-    #     pd.to_datetime("2023-06-23"),
-    #     pd.to_datetime("2023-06-24"),
-    #     pd.to_datetime("2023-06-25"),
-    #     pd.to_datetime("2023-07-01"),
-    #     pd.to_datetime("2023-07-02"),
-    # ]
-    # # 將 'date' 欄位轉換為時間格式
-    # df['Date'] = pd.to_datetime(df['Date'])
-
-    # #去掉假日的資料
-    # df = df[~df['Date'].dt.floor('D').isin(holidays)]
-    # df.set_index('Date', inplace=True)
-
-    # # 以每 1 分鐘為間隔重新獲得資料
-    # df = df.resample('1T').first()
-
-    # # #去掉每天下班後的資料
-    # df = df.between_time('08:00:00', '17:00:00')
-
-    # # 去除空行
-    # df = df.dropna(axis=0, how='any')
-
-    # # 使用前一個非NaN值
-    # df = df.fillna(method='ffill')
-
     return df
 
 
@@ -162,8 +156,8 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
     controller_data = filter_time(controller_data)
     # 沒有開啟冷氣機時的數值更改
     controller_data.loc[controller_data['I_O'] == 0, 'ac_temp'] = 32
-    controller_data.loc[controller_data['I_O'] == 0, 'fan'] = 3
-    controller_data.loc[controller_data['I_O'] == 0, 'mode'] = 3
+    controller_data.loc[controller_data['I_O'] == 0, 'fan'] = 0
+    controller_data.loc[controller_data['I_O'] == 0, 'mode'] = 0
     print(controller_data)
 
     #室外資料
@@ -249,7 +243,10 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
         dataset.loc[np.isnan(dataset['I_O']), 'fan'] = 3
         dataset.loc[np.isnan(dataset['I_O']), 'mode'] = 3
         dataset.loc[np.isnan(dataset['I_O']), 'I_O'] = 0
+        dataset['temp'] = dataset['temp'].rolling(window=5, center=True, min_periods=1).mean()
+        dataset['PM-3133_AI.Kwh'] = dataset['PM-3133_AI.Kwh'].rolling(window=5, center=True, min_periods=1).mean()
         dataset = dataset[['temp', 'PM-3133_AI.Kwh', 'ac_temp', 'I_O', '12', '05' ,'trend', 'seasonal', 'residual']]
+        dataset.to_csv('debug.csv', encoding="UTF-8")
     else:
         dataset = chiller_data.merge(indoor_data, on='Date', how='left')
         dataset = dataset.merge(controller_data, on='Date', how='left')
@@ -272,7 +269,9 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
         dataset.loc[np.isnan(dataset['I_O']), 'fan'] = 3
         dataset.loc[np.isnan(dataset['I_O']), 'mode'] = 3
         dataset.loc[np.isnan(dataset['I_O']), 'I_O'] = 0
+        dataset['PM-3133_AI.Kwh'] = dataset['PM-3133_AI.Kwh'].rolling(window=5, center=True, min_periods=1).mean()
         dataset = dataset[['PM-3133_AI.Kwh', 'temp', 'ac_temp', 'I_O', '12', '05' ,'trend', 'seasonal', 'residual']]
+
     dataset = dataset.fillna(method='ffill')
 
     print(dataset.isnull().any().any())

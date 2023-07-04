@@ -12,7 +12,7 @@ def Model_args():
     parser.add_argument('--factor', type=float, default=0.5, help='學習率每次降低多少')
     parser.add_argument('--patience', type=int, default=5, help='幾次不下降更新學習率')
     # ------StepLR (固定回合調整學習率)
-    parser.add_argument('--lr', type=float, default=0.001, help='學習率')
+    parser.add_argument('--lr', type=float, default=0.01, help='學習率')
     parser.add_argument('--weight_decay', type=float, default=1e-4, help='權值衰減(防止過擬合)')
     # 調整-模型參數
     parser.add_argument('--input_size', type=int, default=9, help='input_size')    # 輸入_多變量=N
