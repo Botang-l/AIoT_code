@@ -52,7 +52,10 @@ class Environment:
         self.__PDmin = data['PDmin']
         self.__ACCmax = data['ACCmax']
         self.__ACCmin = data['ACCmin']
-
+        # test
+        self.Tt = 0
+        self.PDt = 0
+        self.tt = 0
     def get_observation(self):
         # 狀態空間(State Space)，共有5個位置
         return [i for i in range(s, f + 1)]
@@ -76,14 +79,22 @@ class Environment:
         # Tout 和 Pout 分別是選擇特定 action 後，後續的功耗和溫度變化的結果
         Tdata, PDdata = self.__data.load_TSdata()
         Tout = self.__Temp_model(Tdata.to(device)).item()
-        PDout = self.PDadapter(action, PDdata)
-        print('32度: 溫度', Tout, '功耗', PDout)
+        #PDout = self.PDadapter(action, PDdata)
+        PDout = self.__PD_model(PDdata.to(device)).item()
+        print('32度: 溫度', self.temp_denormalize(Tout),'功耗', self.PD_denormalize(PDout))
         Tdata[0][-1][2] = 0
         PDdata[0][-1][2] = 0
         Tout1 = self.__Temp_model(Tdata.to(device)).item()
-        PDout1 = self.PDadapter(action, PDdata)
-        print('20度: 溫度', Tout1, '功耗', PDout1)
-        print(True if (Tout > Tout1) else False, True if (PDout < PDout1) else False)
+        #PDout1 = self.PDadapter(action, PDdata)
+        PDout1 = self.__PD_model(PDdata.to(device)).item()
+        print('20度: 溫度', self.temp_denormalize(Tout1), '功耗', self.PD_denormalize(PDout1))
+        print(True if (Tout >= Tout1) else False, True if (PDout <= PDout1) else False)
+        self.tt += 1
+        if(Tout >= Tout1):
+           self.Tt += 1
+        if (PDout <= PDout1):
+            self.PDt += 1
+
         # 將結果存回 memory
         self.__data.store_TSdata(Tout, PDout)
 
@@ -93,6 +104,7 @@ class Environment:
 
         # 將 reward 加進 total_reward
         self.__totalPD += PDout
+
         # 定義 reward 為預測功耗的負數 (功耗愈高，reward愈低)
         reward = -((PDout * 100)**2)
 
