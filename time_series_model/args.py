@@ -18,8 +18,8 @@ def Model_args():
     parser.add_argument('--input_size', type=int, default=9, help='input_size')    # 輸入_多變量=N
     parser.add_argument('--output_size', type=int, default=1, help='output_size')    # 輸出_多天預測=N
     # ------LSTM
-    parser.add_argument('--hidden_size', type=int, default=64, help='hidden_size')
-    parser.add_argument('--num_layers', type=int, default=2, help='num_layers')
+    parser.add_argument('--hidden_size', type=int, default=32, help='hidden_size')
+    parser.add_argument('--num_layers', type=int, default=1, help='num_layers')
 
     args = parser.parse_known_args()[0]
     return args

@@ -1,5 +1,6 @@
 import sys
 import os
+
 sys.path.append(r".")
 import pandas as pd
 import numpy as np
@@ -69,10 +70,10 @@ def filter_time(df):
     # #去掉每天下班後的資料
     df = df.between_time('08:00:00', '18:00:00')
     # 去除空行
-    # df = df.dropna(axis=0, how='any')
-
+    df = df.dropna(axis=0, how='any')
     # 使用前一個非NaN值
     df = df.fillna(method='ffill')
+    df = df.fillna(0)
     return df
 
 
@@ -124,7 +125,6 @@ def seasonal_decomp(seq_len, df, target):
     return df
 
 
-
 def preprocess_dataset(seq_len, model_name, start_date, end_date):
     """
     Obtain data from the database and perform data preprocessing.
@@ -154,10 +154,6 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
     controller_data = pd.DataFrame(controller_data, columns=["Date", "I_O", "ac_temp", "fan", "mode"])
     # 篩選時間區段
     controller_data = filter_time(controller_data)
-    # 沒有開啟冷氣機時的數值更改
-    controller_data.loc[controller_data['I_O'] == 0, 'ac_temp'] = 32
-    controller_data.loc[controller_data['I_O'] == 0, 'fan'] = 0
-    controller_data.loc[controller_data['I_O'] == 0, 'mode'] = 0
     print(controller_data)
 
     #室外資料
@@ -238,14 +234,9 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
         dataset = dataset.merge(controller_data, on='Date', how='left')
         dataset = dataset.merge(chiller_data, on='Date', how='left')
         dataset = seasonal_decomp(seq_len, dataset, 'temp')
-        # 第一天沒有開啟冷氣機時的數值更改
-        dataset.loc[np.isnan(dataset['I_O']), 'ac_temp'] = 32
-        dataset.loc[np.isnan(dataset['I_O']), 'fan'] = 3
-        dataset.loc[np.isnan(dataset['I_O']), 'mode'] = 3
-        dataset.loc[np.isnan(dataset['I_O']), 'I_O'] = 0
         dataset['temp'] = dataset['temp'].rolling(window=5, center=True, min_periods=1).mean()
         dataset['PM-3133_AI.Kwh'] = dataset['PM-3133_AI.Kwh'].rolling(window=5, center=True, min_periods=1).mean()
-        dataset = dataset[['temp', 'PM-3133_AI.Kwh', 'ac_temp', 'I_O', '12', '05' ,'trend', 'seasonal', 'residual']]
+        dataset = dataset[['temp', 'PM-3133_AI.Kwh', 'ac_temp', 'I_O', '12', '05', 'trend', 'seasonal', 'residual']]
         dataset.to_csv('debug.csv', encoding="UTF-8")
     else:
         dataset = chiller_data.merge(indoor_data, on='Date', how='left')
@@ -264,16 +255,16 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
         # # 使用 apply 方法在每个元素上调用函数，将结果存储在新的 score1 列中
         # dataset['score'] = score.apply(add_random_score)
         ######################
-        # 第一天沒有開啟冷氣機時的數值更改
-        dataset.loc[np.isnan(dataset['I_O']), 'ac_temp'] = 32
-        dataset.loc[np.isnan(dataset['I_O']), 'fan'] = 3
-        dataset.loc[np.isnan(dataset['I_O']), 'mode'] = 3
-        dataset.loc[np.isnan(dataset['I_O']), 'I_O'] = 0
+
         dataset['PM-3133_AI.Kwh'] = dataset['PM-3133_AI.Kwh'].rolling(window=5, center=True, min_periods=1).mean()
-        dataset = dataset[['PM-3133_AI.Kwh', 'temp', 'ac_temp', 'I_O', '12', '05' ,'trend', 'seasonal', 'residual']]
-
+        dataset = dataset[['PM-3133_AI.Kwh', 'temp', 'ac_temp', 'I_O', '12', '05', 'trend', 'seasonal', 'residual']]
+    # 沒有開啟冷氣機時的數值更改
+    dataset.loc[np.isnan(dataset['I_O']), 'fan'] = 3
+    dataset.loc[np.isnan(dataset['I_O']), 'mode'] = 3
     dataset = dataset.fillna(method='ffill')
-
+    dataset = dataset.fillna(0)
+    dataset.loc[dataset['I_O'] == 0, 'ac_temp'] = 32
+    dataset.to_csv("fuck.csv", encoding="UTF-8")
     print(dataset.isnull().any().any())
     print(dataset)
     return dataset
@@ -333,7 +324,7 @@ def normalize_data(data, max_min_vals):
     max_vals = max_min_vals[:, 0]
     min_vals = max_min_vals[:, 1]
     normalized_data = (data - min_vals) / (max_vals - min_vals)
-    normalized_data = normalized_data.fillna(0)
+    # normalized_data = normalized_data.fillna(0)
 
     return normalized_data.values, max_min_vals[0][0], max_min_vals[0][1]
 
@@ -387,7 +378,7 @@ def batch_data(final_seq, batch_size):
     return final_seq
 
 
-def preprocess_seq(args, model_name, start_date, end_date, get_new_data = True):
+def preprocess_seq(args, model_name, start_date, end_date, get_new_data=True):
     """
     Calls all preprocessing functions to prepare the data.
     Args:
@@ -426,34 +417,33 @@ def preprocess_seq(args, model_name, start_date, end_date, get_new_data = True):
         merged_seq = torch.stack([i[0] for i in merged_seq])
         torch.save(merged_seq, os.path.join(os.path.dirname(__file__), 'data/dataset.pt'))
         if (get_new_data):
-            with open(os.path.join(os.path.dirname(__file__),'data/MaxMinData.json'), 'w') as f:
-                json.dump({'Tmax':max_min_array[0][0],
-                        'Tmin':max_min_array[0][1],
-                        'PDmax':max_min_array[1][0],
-                        'PDmin':max_min_array[1][1],
-                        'ACCmax':max_min_array[2][0],
-                        'ACCmin':max_min_array[2][1],
-                        }, f)
-    return Train_seq, Val_seq, Test_seq, train_max, train_min, merged_seq
+            with open(os.path.join(os.path.dirname(__file__), 'data/MaxMinData.json'), 'w') as f:
+                json.dump({
+                    'Tmax': max_min_array[0][0],
+                    'Tmin': max_min_array[0][1],
+                    'PDmax': max_min_array[1][0],
+                    'PDmin': max_min_array[1][1],
+                    'ACCmax': max_min_array[2][0],
+                    'ACCmin': max_min_array[2][1],
+                },
+                          f)
+    return Train_seq, Val_seq, Test_seq, train_max, train_min
 
 
 def Temp_Model(model_name, model_path, start_date, end_date):
     args = Model_args()
-    Train_seq, Val_seq, Test_seq, train_max, train_min, final_seq = preprocess_seq(args, model_name, start_date, end_date)
+    Train_seq, Val_seq, Test_seq, train_max, train_min = preprocess_seq(args, model_name, start_date, end_date)
     train(args, model_name, model_path, Train_seq, Val_seq)
     test(args, model_name, model_path, Test_seq, train_max, train_min)
-    return final_seq
 
 
 def PD_Model(model_name, model_path, start_date, end_date):
     args = Model_args()
-    Train_seq, Val_seq, Test_seq, train_max, train_min, final_seq = preprocess_seq(args, model_name, start_date, end_date)
+    Train_seq, Val_seq, Test_seq, train_max, train_min = preprocess_seq(args, model_name, start_date, end_date)
     train(args, model_name, model_path, Train_seq, Val_seq)
     test(args, model_name, model_path, Test_seq, train_max, train_min)
-    return final_seq
 
 
 def getRLdata(start_date, end_date):
     args = Model_args()
-    preprocess_seq(args, 'Temp_Model', start_date, end_date,get_new_data = False)
-
+    preprocess_seq(args, 'Temp_Model', start_date, end_date, get_new_data=False)

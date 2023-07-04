@@ -16,6 +16,7 @@ from .Environment import *
 
 from tqdm import tqdm
 
+
 def dqn():
     num_episodes = GPU_TIMES if torch.cuda.is_available() else CPU_TIMES
     for i in range(1):
@@ -30,11 +31,11 @@ def dqn():
             print('-' * 20)
             state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             for t in tqdm(range(1400)):
-               # print(state)
+                # print(state)
                 action = select_action(state)
                 #action = 1
                 observation, reward, terminated, truncated, _ = env.step(action.item())
-               # print(observation)
+                # print(observation)
                 reward = torch.tensor([reward], device=device)
                 done = terminated or truncated
                 if terminated:
@@ -56,7 +57,8 @@ def dqn():
                 target_net_state_dict = target_net.state_dict()
                 policy_net_state_dict = policy_net.state_dict()
                 for key in policy_net_state_dict:
-                    target_net_state_dict[key] = policy_net_state_dict[key] * TAU + target_net_state_dict[key] * (1 - TAU)
+                    target_net_state_dict[key
+                                         ] = policy_net_state_dict[key] * TAU + target_net_state_dict[key] * (1 - TAU)
                 target_net.load_state_dict(target_net_state_dict)
 
                 if done:
@@ -72,7 +74,7 @@ def dqn():
 
         RL_model()
         total_reward.append(env.totalReward())
-        
+
         print('Complete')
         plot_durations(total_reward, show_result=True)
         plt.savefig(os.path.join(os.path.dirname(__file__), 'result/reward{}.png'.format(str(i + 1))))
