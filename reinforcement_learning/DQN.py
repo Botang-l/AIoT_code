@@ -1,4 +1,3 @@
-import gymnasium as gym
 import matplotlib.pyplot as plt
 from itertools import count
 

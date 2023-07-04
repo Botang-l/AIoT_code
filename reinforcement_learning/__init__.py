@@ -1,4 +1,3 @@
-import gymnasium as gym
 import torch
 import torch.optim as optim
 

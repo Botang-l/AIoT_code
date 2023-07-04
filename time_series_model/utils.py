@@ -73,7 +73,6 @@ def filter_time(df):
     df = df.dropna(axis=0, how='any')
     # 使用前一個非NaN值
     df = df.fillna(method='ffill')
-    df = df.fillna(0)
     return df
 
 
@@ -236,7 +235,18 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
         dataset = seasonal_decomp(seq_len, dataset, 'temp')
         dataset['temp'] = dataset['temp'].rolling(window=5, center=True, min_periods=1).mean()
         dataset['PM-3133_AI.Kwh'] = dataset['PM-3133_AI.Kwh'].rolling(window=5, center=True, min_periods=1).mean()
-        dataset = dataset[['temp', 'PM-3133_AI.Kwh', 'ac_temp', 'I_O', '12', '05', 'trend', 'seasonal', 'residual']]
+        dataset = dataset[[
+            'temp',
+            'PM-3133_AI.Kwh',
+            'ac_temp',
+            'I_O',
+            '12',
+            '05',
+            'fan',
+            'trend',
+            'seasonal',
+            'residual'
+        ]]
         dataset.to_csv('debug.csv', encoding="UTF-8")
     else:
         dataset = chiller_data.merge(indoor_data, on='Date', how='left')
@@ -257,13 +267,24 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
         ######################
 
         dataset['PM-3133_AI.Kwh'] = dataset['PM-3133_AI.Kwh'].rolling(window=5, center=True, min_periods=1).mean()
-        dataset = dataset[['PM-3133_AI.Kwh', 'temp', 'ac_temp', 'I_O', '12', '05', 'trend', 'seasonal', 'residual']]
+        dataset = dataset[[
+            'PM-3133_AI.Kwh',
+            'temp',
+            'ac_temp',
+            'I_O',
+            '12',
+            '05',
+            'fan',
+            'trend',
+            'seasonal',
+            'residual'
+        ]]
     # 沒有開啟冷氣機時的數值更改
-    dataset.loc[np.isnan(dataset['I_O']), 'fan'] = 3
-    dataset.loc[np.isnan(dataset['I_O']), 'mode'] = 3
     dataset = dataset.fillna(method='ffill')
     dataset = dataset.fillna(0)
     dataset.loc[dataset['I_O'] == 0, 'ac_temp'] = 32
+    dataset.loc[dataset['I_O'] == 0, 'fan'] = 4
+    dataset.loc[dataset['I_O'] == 0, 'PM-3133_AI.Kwh'] = 0
     dataset.to_csv("fuck.csv", encoding="UTF-8")
     print(dataset.isnull().any().any())
     print(dataset)

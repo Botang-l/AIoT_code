@@ -15,11 +15,10 @@ def Model_args():
     parser.add_argument('--lr', type=float, default=0.01, help='學習率')
     parser.add_argument('--weight_decay', type=float, default=1e-4, help='權值衰減(防止過擬合)')
     # 調整-模型參數
-    parser.add_argument('--input_size', type=int, default=9, help='input_size')    # 輸入_多變量=N
+    parser.add_argument('--input_size', type=int, default=10, help='input_size')    # 輸入_多變量=N
     parser.add_argument('--output_size', type=int, default=1, help='output_size')    # 輸出_多天預測=N
     # ------LSTM
-    parser.add_argument('--hidden_size', type=int, default=32, help='hidden_size')
+    parser.add_argument('--hidden_size', type=int, default=16, help='hidden_size')
     parser.add_argument('--num_layers', type=int, default=1, help='num_layers')
-
     args = parser.parse_known_args()[0]
     return args

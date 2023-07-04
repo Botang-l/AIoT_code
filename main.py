@@ -12,7 +12,7 @@ if __name__ == '__main__':
     #儲存模型位置
     model_path = 'time_series_model/model/Temp_Model.pkl'
     # 訓練預測溫度模型
-    Temp_Model(model_name, model_path, start_date, end_date)
+    # Temp_Model(model_name, model_path, start_date, end_date)
 
     #模型名稱
     model_name = 'PD_Model'

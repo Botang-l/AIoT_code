@@ -22,7 +22,6 @@ class LSTM(nn.Module):
         self.output_size = output_size
         self.num_directions = 1
         self.batch_size = batch_size
-
         self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, batch_first=True)
         self.linear = nn.Linear(self.hidden_size, self.output_size)
 
@@ -147,7 +146,15 @@ def get_mape(y, pred):
 
     """
 
-    return np.mean(np.abs((y - pred) / y))
+    mask = y != 0  # Create a mask to exclude instances where y is zero
+    y_filtered = y[mask]
+    pred_filtered = pred[mask]
+    
+    errors = np.abs((y_filtered - pred_filtered) / y_filtered)
+    errors[np.isinf(errors)] = 0  # Replace infinite values with zero
+    
+    mape = np.mean(errors)
+    return mape
 
 
 def get_plot(model_name, y, pred):
