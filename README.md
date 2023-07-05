@@ -59,6 +59,7 @@ AIoT_code/
     ```
 3. 編輯完成後進行 commit
     ```shell
+    $ yapf -i -r -vv .
     $ git add .
     $ git commit -m "COMMIT_MSG"
     ```
