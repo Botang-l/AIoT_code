@@ -56,6 +56,7 @@ class Environment:
         self.Tt = 0
         self.PDt = 0
         self.tt = 0
+
     def get_observation(self):
         # 狀態空間(State Space)，共有5個位置
         return [i for i in range(s, f + 1)]
@@ -81,7 +82,7 @@ class Environment:
         Tout = self.__Temp_model(Tdata.to(device)).item()
         #PDout = self.PDadapter(action, PDdata)
         PDout = self.__PD_model(PDdata.to(device)).item()
-        print('32度: 溫度', self.temp_denormalize(Tout),'功耗', self.PD_denormalize(PDout))
+        print('32度: 溫度', self.temp_denormalize(Tout), '功耗', self.PD_denormalize(PDout))
         Tdata[0][-1][2] = 0
         PDdata[0][-1][2] = 0
         Tout1 = self.__Temp_model(Tdata.to(device)).item()
@@ -90,8 +91,8 @@ class Environment:
         print('20度: 溫度', self.temp_denormalize(Tout1), '功耗', self.PD_denormalize(PDout1))
         print(True if (Tout >= Tout1) else False, True if (PDout <= PDout1) else False)
         self.tt += 1
-        if(Tout >= Tout1):
-           self.Tt += 1
+        if (Tout >= Tout1):
+            self.Tt += 1
         if (PDout <= PDout1):
             self.PDt += 1
 

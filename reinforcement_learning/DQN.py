@@ -65,12 +65,12 @@ def dqn():
                     total_reward.append(env.totalReward())
                     #plot_durations(total_reward)
                     break
-            
+
             print('\n')
             env.displayTotalReward()
-        print(env.Tt, "/", env.tt, "=", env.Tt/env.tt)
-        print(env.PDt, "/", env.tt, "=", env.PDt/env.tt)
-        
+        print(env.Tt, "/", env.tt, "=", env.Tt / env.tt)
+        print(env.PDt, "/", env.tt, "=", env.PDt / env.tt)
+
         torch.save(target_net, os.path.join(os.path.dirname(__file__), 'model/target_net.pth'))
         torch.save(policy_net, os.path.join(os.path.dirname(__file__), 'model/policy_net.pth'))
 

@@ -102,8 +102,8 @@ class TransformerModel(nn.Module):
 
         self.embedding = nn.Embedding(input_size, hidden_size)    # 新增的線性層
         self.transformer = Transformer(
-            d_model=hidden_size, 
-            nhead=8, 
+            d_model=hidden_size,
+            nhead=8,
             num_encoder_layers=num_layers,
             num_decoder_layers=num_layers
         )
@@ -151,13 +151,13 @@ def get_mape(y, pred):
 
     """
 
-    mask = y != 0  # Create a mask to exclude instances where y is zero
+    mask = y != 0    # Create a mask to exclude instances where y is zero
     y_filtered = y[mask]
     pred_filtered = pred[mask]
-    
+
     errors = np.abs((y_filtered - pred_filtered) / y_filtered)
-    errors[np.isinf(errors)] = 0  # Replace infinite values with zero
-    
+    errors[np.isinf(errors)] = 0    # Replace infinite values with zero
+
     mape = np.mean(errors)
     return mape
 
