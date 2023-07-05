@@ -91,25 +91,30 @@ class TPA_LSTM(nn.Module):
 from torch.nn import Transformer
 
 
-class TPA_Transformer(nn.Module):
+class TransformerModel(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, output_size, batch_size):
-        super().__init__()
+        super(TransformerModel, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.output_size = output_size
         self.batch_size = batch_size
 
-        self.linear_emb = nn.Linear(input_size, hidden_size)    # 新增的線性層
-        self.transformer = Transformer(d_model=hidden_size, nhead=8, num_encoder_layers=num_layers)
+        self.embedding = nn.Embedding(input_size, hidden_size)    # 新增的線性層
+        self.transformer = Transformer(
+            d_model=hidden_size, 
+            nhead=8, 
+            num_encoder_layers=num_layers,
+            num_decoder_layers=num_layers
+        )
         self.linear = nn.Linear(hidden_size, output_size)
 
-    def forward(self, input_seq):
-        transformer_output = self.transformer(input_seq)
-        print(transformer_output)
-        transformer_output = transformer_output.permute(1, 0, 2)    # (batch_size, seq_len, hidden_size)
-        pred = self.linear(transformer_output[:, -1, :])
-        return pred
+    def forward(self, src, tgt):
+        src = self.embedding(src)
+        tgt = self.embedding(tgt)
+        output = self.transformer(src, tgt)
+        output = self.linear(output)
+        return output
 
 
 def un_normalize_data(y, pred, target_max, target_min):
@@ -260,8 +265,10 @@ def train(args, model_name, model_path, train_data, val_data):
     train_loss_history, val_loss_history = [], []
     for epoch in tqdm(range(args.epochs)):
         train_loss = []
+        print(train_data)
         model.train()
         for seq, label in train_data:
+
             seq, label = seq.to(device), label.to(device)
             y_pred = model(seq)
             loss = loss_function(y_pred, label)

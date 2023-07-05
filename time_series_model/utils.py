@@ -375,6 +375,10 @@ def create_seq(input_size, seq_len, data):
     print(f'seq_len: {seq_len}')
     print(f'總列數: ({len(other)}, {len(other[0])})')
     print(f'序列化_seq_data: ({len(final_seq)}, {len(final_seq[0])})\n')
+    print('final_seq : 資料類型={}, 列數={}'.format(type(final_seq), len(final_seq)))
+    print('final_seq[0] : 資料類型={}, 列數={}'.format(type(final_seq[0]), len(final_seq[0])))
+    print('final_seq[0][0] : 資料類型={}, 內容數={}'.format(type(final_seq[0][0]), final_seq[0][0].shape))
+    print('final_seq[0][1] : 資料類型={}, 內容數={}'.format(type(final_seq[0][1]), final_seq[0][1].shape))
     (first_seq, label) = final_seq[0]
     print("示範:")
     print("seq:", first_seq)
