@@ -48,13 +48,10 @@ AIoT_code/
 └── main.py
 ```
 ## how to maintain this repo
-每次增修內容前請依循下列流程進行：
-:::info
-請確認是否有安裝 yapf ，若沒有請自行安裝
+每次增修內容前請依循下列流程進行，請確認是否有安裝 yapf ，若沒有需請自行安裝
 ```shell
 pip3 install yapf
 ```
-:::
 1. Pull origin/develop 最新版本
     ```shell
     $ git pull origin develop
