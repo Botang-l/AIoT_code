@@ -34,12 +34,12 @@ class Environment:
         self.actionlist = []
         self.__action_times = [0] * 9
 
-        path = '/home/remote_user/sharefile/AIoT_code/time_series_model/model/PD_Model.pkl'
+        path = '/home/remote_user/sharefile/AIoT_code/time_series_model/model/Transformer_PD_Model.pkl'
         loaded_model = torch.load(path)
         self.__PD_model = loaded_model['model'].to(device)
         self.__PD_model.eval()
 
-        path = '/home/remote_user/sharefile/AIoT_code/time_series_model/model/Temp_Model.pkl'
+        path = '/home/remote_user/sharefile/AIoT_code/time_series_model/model/Transformer_Temp_Model.pkl'
         loaded_model = torch.load(path)
         self.__Temp_model = loaded_model['model'].to(device)
         self.__Temp_model.eval()

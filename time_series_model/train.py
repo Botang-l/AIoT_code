@@ -88,32 +88,49 @@ class TPA_LSTM(nn.Module):
         return pred
 
 
-from torch.nn import Transformer
-
-
+# 定義 Transforme rModel
 class TransformerModel(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, output_size, batch_size):
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, num_heads):
         super(TransformerModel, self).__init__()
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.num_layers = num_layers
-        self.output_size = output_size
-        self.batch_size = batch_size
-
-        self.embedding = nn.Embedding(input_size, hidden_size)    # 新增的線性層
-        self.transformer = Transformer(
-            d_model=hidden_size,
-            nhead=8,
+        self.embedding = nn.Linear(input_dim, hidden_dim)
+        self.transformer = nn.Transformer(
+            d_model=hidden_dim,
+            nhead=num_heads,
             num_encoder_layers=num_layers,
             num_decoder_layers=num_layers
         )
-        self.linear = nn.Linear(hidden_size, output_size)
+        self.fc = nn.Linear(hidden_dim, output_dim)
 
-    def forward(self, src, tgt):
+    def forward(self, src):
         src = self.embedding(src)
-        tgt = self.embedding(tgt)
-        output = self.transformer(src, tgt)
-        output = self.linear(output)
+        output = self.transformer(src, src)
+        output = self.fc(output)
+        output = output[:, -1, :]
+        return output
+
+
+class LSTMtoTransformerModel(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, num_heads):
+        super(LSTMtoTransformerModel, self).__init__()
+        self.hidden_dim = hidden_dim
+
+        self.lstm = nn.LSTM(input_dim, hidden_dim, 1, batch_first=True)
+        self.transformer = nn.Transformer(
+            d_model=hidden_dim,
+            nhead=num_heads,
+            num_encoder_layers=num_layers,
+            num_decoder_layers=num_layers
+        )
+        self.fc = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, src):
+        batch_size, _ = src.shape[0], src.shape[1]
+        h_0 = torch.randn(1, batch_size, self.hidden_dim).to(device)
+        c_0 = torch.randn(1, batch_size, self.hidden_dim).to(device)
+        src, _ = self.lstm(src, (h_0, c_0))
+        output = self.transformer(src, src)
+        output = self.fc(output)
+        output = output[:, -1, :]
         return output
 
 
@@ -272,6 +289,58 @@ def train(args, model_name, model_path, train_data, val_data):
             seq, label = seq.to(device), label.to(device)
             y_pred = model(seq)
             loss = loss_function(y_pred, label)
+            train_loss.append(loss.item())
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        val_loss = get_val_loss(model, val_data, loss_function)
+        if epoch + 1 >= min_epochs and val_loss < min_val_loss:
+            min_val_loss = val_loss
+            best_model = model.state_dict()
+
+        scheduler.step(val_loss)
+        train_loss_history.append(np.mean(train_loss))
+        val_loss_history.append(val_loss)
+        if (epoch + 1) % 100 == 0:
+            print('epoch {:03d} train_loss {:.8f} val_loss {:.8f}'.format(epoch, np.mean(train_loss), val_loss))
+
+    # Print results
+    get_plot(model_name + '_loss', train_loss_history, val_loss_history)
+    save_model = {'model': model}
+    torch.save(save_model, model_path)
+
+
+def trainTransformer(args, model_name, model_path, train_data, val_data):
+    """
+    Trains a model using the given training and validation data.
+
+    Args:
+        args: An object containing training arguments.
+        train_data: The training data (a DataLoader object).
+        val_data: The validation data (a DataLoader object).
+
+    """
+    model = TransformerModel(
+        input_dim=args.input_size,
+        hidden_dim=args.hidden_size,
+        output_dim=args.output_size,
+        num_layers=args.num_layers,
+        num_heads=args.num_heads
+    ).to(device)
+    loss_function = nn.MSELoss().to(device)
+    optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=args.factor, patience=args.patience, verbose=True)
+    min_epochs, min_val_loss, best_model = 5, float('inf'), None
+    train_loss_history, val_loss_history = [], []
+    for epoch in tqdm(range(args.epochs)):
+        train_loss = []
+        model.train()
+        for seq, label in train_data:
+
+            seq, label = seq.to(device), label.to(device)
+            y_pred = model(seq)
+            loss = loss_function(y_pred.view(-1), label.view(-1)).to(device)
             train_loss.append(loss.item())
             optimizer.zero_grad()
             loss.backward()

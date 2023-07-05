@@ -30,11 +30,8 @@ def dqn():
             print('-' * 20)
             state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             for t in tqdm(range(1400)):
-                # print(state)
                 action = select_action(state)
-                #action = 1
                 observation, reward, terminated, truncated, _ = env.step(action.item())
-                # print(observation)
                 reward = torch.tensor([reward], device=device)
                 done = terminated or truncated
                 if terminated:

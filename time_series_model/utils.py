@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
-from time_series_model.train import train, test
+from time_series_model.train import train, trainTransformer, test
 from time_series_model.args import Model_args
 from data.get_db import get_data_period
 from statsmodels.tsa.seasonal import seasonal_decompose
@@ -466,6 +466,20 @@ def PD_Model(model_name, model_path, start_date, end_date):
     args = Model_args()
     Train_seq, Val_seq, Test_seq, train_max, train_min = preprocess_seq(args, model_name, start_date, end_date)
     train(args, model_name, model_path, Train_seq, Val_seq)
+    test(args, model_name, model_path, Test_seq, train_max, train_min)
+
+
+def Transformer_Temp_Model(model_name, model_path, start_date, end_date):
+    args = Model_args()
+    Train_seq, Val_seq, Test_seq, train_max, train_min = preprocess_seq(args, model_name, start_date, end_date)
+    trainTransformer(args, model_name, model_path, Train_seq, Val_seq)
+    test(args, model_name, model_path, Test_seq, train_max, train_min)
+
+
+def Transformer_PD_Model(model_name, model_path, start_date, end_date):
+    args = Model_args()
+    Train_seq, Val_seq, Test_seq, train_max, train_min = preprocess_seq(args, model_name, start_date, end_date)
+    trainTransformer(args, model_name, model_path, Train_seq, Val_seq)
     test(args, model_name, model_path, Test_seq, train_max, train_min)
 
 
