@@ -52,10 +52,6 @@ class Environment:
         self.__PDmin = data['PDmin']
         self.__ACCmax = data['ACCmax']
         self.__ACCmin = data['ACCmin']
-        # test
-        self.Tt = 0
-        self.PDt = 0
-        self.tt = 0
 
     def get_observation(self):
         # 狀態空間(State Space)，共有5個位置
@@ -68,11 +64,13 @@ class Environment:
     # 存在 memory 裡面的內容都必須先 normalization #
     ##############################################
     def step(self, action):
-        action = 0
         self.__action_times[action] += 1
         #print('ACTION :', ACTION[action], " /  NUMBER :", action, self.ACC_normalize(ACTION[action]))
         # 將 RL model 的 action 存到 memory
-        self.__data.store_RLdata(self.ACC_normalize(ACTION[action]))
+        if (action == 0):
+            self.__data.store_RLdata(self.ACC_normalize(ACTION[action]), True)
+        else:
+            self.__data.store_RLdata(self.ACC_normalize(ACTION[action]))
         # 將 RL model 的 action 加到該回合決策集
         self.actionlist.append(ACTION[action])
 
@@ -80,21 +78,11 @@ class Environment:
         # Tout 和 Pout 分別是選擇特定 action 後，後續的功耗和溫度變化的結果
         Tdata, PDdata = self.__data.load_TSdata()
         Tout = self.__Temp_model(Tdata.to(device)).item()
-        #PDout = self.PDadapter(action, PDdata)
-        PDout = self.__PD_model(PDdata.to(device)).item()
-        print('32度: 溫度', self.temp_denormalize(Tout), '功耗', self.PD_denormalize(PDout))
+        PDout = self.PDadapter(action, PDdata)
+        #PDout = self.__PD_model(PDdata.to(device)).item()
+        #print('溫度', self.temp_denormalize(Tout), '功耗', self.PD_denormalize(PDout))
         Tdata[0][-1][2] = 0
         PDdata[0][-1][2] = 0
-        Tout1 = self.__Temp_model(Tdata.to(device)).item()
-        #PDout1 = self.PDadapter(action, PDdata)
-        PDout1 = self.__PD_model(PDdata.to(device)).item()
-        print('20度: 溫度', self.temp_denormalize(Tout1), '功耗', self.PD_denormalize(PDout1))
-        print(True if (Tout >= Tout1) else False, True if (PDout <= PDout1) else False)
-        self.tt += 1
-        if (Tout >= Tout1):
-            self.Tt += 1
-        if (PDout <= PDout1):
-            self.PDt += 1
 
         # 將結果存回 memory
         self.__data.store_TSdata(Tout, PDout)

@@ -35,4 +35,5 @@ if __name__ == '__main__':
     start_date = date(2023, 6, 26)
     end_date = date(2023, 6, 26)
     getRLdata(start_date, end_date)
-    dqn()
+    #dqn()
+    RL_model()

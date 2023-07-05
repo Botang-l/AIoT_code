@@ -65,8 +65,10 @@ class ACData(object):
         return (RLdata)
 
     # 將 RL 所生成的 data 放進 __data 變數
-    def store_RLdata(self, RLdata):
+    def store_RLdata(self, RLdata, IOchange=False):
         self.__data[-1][2] = RLdata
+        if (IOchange):
+            self.__data[-1][3] = 0
 
     # 取得 Time Series Model 需要的單筆 data
     def load_TSdata(self):

@@ -242,7 +242,12 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
             'I_O',
             '12',
             '05',
+            '67',
+            'TEMP',
+            'HUMD',
             'fan',
+            'humi',
+            'CO2',
             'trend',
             'seasonal',
             'residual'
@@ -274,7 +279,12 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
             'I_O',
             '12',
             '05',
+            '67',
+            'TEMP',
+            'HUMD',
             'fan',
+            'humi',
+            'CO2',
             'trend',
             'seasonal',
             'residual'
@@ -345,7 +355,7 @@ def normalize_data(data, max_min_vals):
     max_vals = max_min_vals[:, 0]
     min_vals = max_min_vals[:, 1]
     normalized_data = (data - min_vals) / (max_vals - min_vals)
-    # normalized_data = normalized_data.fillna(0)
+    normalized_data = normalized_data.fillna(0)
 
     return normalized_data.values, max_min_vals[0][0], max_min_vals[0][1]
 

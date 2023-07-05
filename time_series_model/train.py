@@ -282,7 +282,6 @@ def train(args, model_name, model_path, train_data, val_data):
     train_loss_history, val_loss_history = [], []
     for epoch in tqdm(range(args.epochs)):
         train_loss = []
-        print(train_data)
         model.train()
         for seq, label in train_data:
 
