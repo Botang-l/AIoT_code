@@ -43,36 +43,39 @@ def filter_time(df):
         A modified DataFrame with the filtered data.
     """
     # 將 'date' 欄位轉換為時間格式
-    #df['Date'] = pd.to_datetime(df['Date'])
-
-    # 以每 1 分鐘為間隔重新獲得資料
-    #df = df.resample('1T', on='Date').first()
-
-    # 使用前一個非NaN值
-    #df = df.fillna(method='ffill')
-    holidays = [
-        pd.to_datetime("2023-06-17"),
-        pd.to_datetime("2023-06-18"),
-        pd.to_datetime("2023-06-22"),
-        pd.to_datetime("2023-06-23"),
-        pd.to_datetime("2023-06-24"),
-        pd.to_datetime("2023-06-25"),
-        pd.to_datetime("2023-07-01"),
-        pd.to_datetime("2023-07-02"),
-    ]
-    # 將 'date' 欄位轉換為時間格式
     df['Date'] = pd.to_datetime(df['Date'])
-    # 去掉假日的資料
-    df = df[~df['Date'].dt.floor('D').isin(holidays)]
-    df.set_index('Date', inplace=True)
-    # 以每 1 分鐘為間隔重新獲得資料
-    df = df.resample('1T').first()
-    # #去掉每天下班後的資料
+
+    #以每 1 分鐘為間隔重新獲得資料
+    df = df.resample('1T', on='Date').first()
+    #去掉每天下班後的資料
     df = df.between_time('08:00:00', '18:00:00')
     # 去除空行
     df = df.dropna(axis=0, how='any')
-    # 使用前一個非NaN值
+    #使用前一個非NaN值
     df = df.fillna(method='ffill')
+    # holidays = [
+    # pd.to_datetime("2023-06-17"),
+    # pd.to_datetime("2023-06-18"),
+    # pd.to_datetime("2023-06-22"),
+    # pd.to_datetime("2023-06-23"),
+    # pd.to_datetime("2023-06-24"),
+    # pd.to_datetime("2023-06-25"),
+    # pd.to_datetime("2023-07-01"),
+    # pd.to_datetime("2023-07-02"),
+    # ]
+    # 將 'date' 欄位轉換為時間格式
+    # df['Date'] = pd.to_datetime(df['Date'])
+    # 去掉假日的資料
+    # df = df[~df['Date'].dt.floor('D').isin(holidays)]
+    # df.set_index('Date', inplace=True)
+    # # 以每 1 分鐘為間隔重新獲得資料
+    # df = df.resample('1T').first()
+    # # #去掉每天下班後的資料
+    # df = df.between_time('08:00:00', '19:00:00')
+    # # 去除空行
+    # df = df.dropna(axis=0, how='any')
+    # # 使用前一個非NaN值
+    # df = df.fillna(method='ffill')
     return df
 
 
@@ -89,8 +92,8 @@ def make_features(df, col1, col2):
         A modified DataFrame with new features created based on the specified columns.
     """
     # 判斷是哪一種特徵,'tM'開頭則兩行相減,'PM'開頭則是下一筆資料減去目前這一筆資料
-    if col1[: 2] == 'tM':
-        df[col1[-1] + col2[-1]] = abs(df[col1] - df[col2])
+    if col1[: 2] == 'tM' or col1[: 2] == 'ac':
+        df[col1[-1] + col2[-1]] = df[col1] - df[col2]
         df = df.drop([col1, col2], axis=1)
     else:
         df[col1] = df[col1].shift(-1) - df[col1]
@@ -212,37 +215,55 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
     chiller_data = chiller_data.drop(['date', 'time'], axis=1)
     # 將要 predict 的 column 移動到第一行
     chiller_data = adjust_col(chiller_data, "PM-3133_AI.Kwh")
-    # 篩選時間區段
-    chiller_data = filter_time(chiller_data)
     # 蒸發器差值
     chiller_data = make_features(chiller_data, 'tM-TH8_AI.sensor0', 'tM-TH8_AI.sensor5')
     # 壓縮機差值
-    chiller_data = make_features(chiller_data, 'tM-TH8_AI.sensor1', 'tM-TH8_AI.sensor2')
+    chiller_data = make_features(chiller_data, 'tM-TH8_AI.sensor2', 'tM-TH8_AI.sensor1')
     # 膨脹閥差值
-    chiller_data = make_features(chiller_data, 'tM-TH8_AI.sensor6', 'tM-TH8_AI.sensor7')
+    chiller_data = make_features(chiller_data, 'tM-TH8_AI.sensor7', 'tM-TH8_AI.sensor6')
     # 調整有功功率數值
     chiller_data = make_features(chiller_data, 'PM-3133_AI.Kwh', None)
     # 調整無功功率數值
     chiller_data = make_features(chiller_data, 'PM-3133_AI.Kvarh', None)
     # 調整視在功率數值
     chiller_data = make_features(chiller_data, 'PM-3133_AI.Kvah', None)
+    # 篩選時間區段
+    chiller_data = filter_time(chiller_data)
     print(chiller_data)
     if (model_name == 'Temp_Model'):
         # merge
         dataset = indoor_data.merge(outdoor_data, on='Date', how='left')
         dataset = dataset.merge(controller_data, on='Date', how='left')
         dataset = dataset.merge(chiller_data, on='Date', how='left')
-        dataset = seasonal_decomp(seq_len, dataset, 'temp')
+
+        # 沒有開啟冷氣機時的數值更改
+        dataset = dataset.fillna(method='ffill')
+        dataset = dataset.fillna(0)
+        dataset.loc[dataset['I_O'] == 0, 'ac_temp'] = 32
+        dataset.loc[dataset['I_O'] == 0, 'fan'] = 4
+
+        dataset.temp.to_csv('temp.csv', encoding="UTF-8")
+        # rolling
         dataset['temp'] = dataset['temp'].rolling(window=5, center=True, min_periods=1).mean()
         dataset['PM-3133_AI.Kwh'] = dataset['PM-3133_AI.Kwh'].rolling(window=5, center=True, min_periods=1).mean()
+        dataset.loc[dataset['I_O'] == 0, 'PM-3133_AI.Kwh'] = 0
+        # 當前溫度與上一刻溫度差值
+        dataset['temp_diff'] = dataset['temp'] - dataset['temp'].shift(1)
+        dataset['temp_diff'] = dataset['temp_diff'].fillna(method='ffill')
+        dataset = dataset.fillna(0)
+        # 環境溫度與遙控器溫度差值 pp
+        dataset = make_features(dataset, 'ac_temp', 'temp')
+
+        dataset = seasonal_decomp(seq_len, dataset, 'temp_diff')
+
         dataset = dataset[[
-            'temp',
+            'temp_diff',
             'PM-3133_AI.Kwh',
-            'ac_temp',
+            'pp',
             'I_O',
-            '12',
+            '21',
             '05',
-            '67',
+            '76',
             'TEMP',
             'HUMD',
             'fan',
@@ -252,12 +273,29 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
             'seasonal',
             'residual'
         ]]
-        dataset.to_csv('debug.csv', encoding="UTF-8")
     else:
         dataset = chiller_data.merge(indoor_data, on='Date', how='left')
         dataset = dataset.merge(controller_data, on='Date', how='left')
         dataset = dataset.merge(outdoor_data, on='Date', how='left')
+        # 沒有開啟冷氣機時的數值更改
+        dataset = dataset.fillna(method='ffill')
+        dataset = dataset.fillna(0)
+        dataset.loc[dataset['I_O'] == 0, 'ac_temp'] = 32
+        dataset.loc[dataset['I_O'] == 0, 'fan'] = 4
+
+        # rolling
+        dataset['temp'] = dataset['temp'].rolling(window=5, center=True, min_periods=1).mean()
+        dataset['PM-3133_AI.Kwh'] = dataset['PM-3133_AI.Kwh'].rolling(window=5, center=True, min_periods=1).mean()
+        dataset.loc[dataset['I_O'] == 0, 'PM-3133_AI.Kwh'] = 0
+        # 當前溫度與上一刻溫度差值
+        dataset['temp_diff'] = dataset['temp'] - dataset['temp'].shift(1)
+        dataset['temp_diff'] = dataset['temp_diff'].fillna(method='ffill')
+        dataset = dataset.fillna(0)
+        # 環境溫度與遙控器溫度差值 pp
+        dataset = make_features(dataset, 'ac_temp', 'temp')
+
         dataset = seasonal_decomp(seq_len, dataset, 'PM-3133_AI.Kwh')
+
         # #####################
         # # 垃圾程式碼
         # def add_random_score(next_score):
@@ -271,15 +309,14 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
         # dataset['score'] = score.apply(add_random_score)
         ######################
 
-        dataset['PM-3133_AI.Kwh'] = dataset['PM-3133_AI.Kwh'].rolling(window=5, center=True, min_periods=1).mean()
         dataset = dataset[[
             'PM-3133_AI.Kwh',
-            'temp',
-            'ac_temp',
+            'temp_diff',
+            'pp',
             'I_O',
-            '12',
+            '21',
             '05',
-            '67',
+            '76',
             'TEMP',
             'HUMD',
             'fan',
@@ -289,13 +326,7 @@ def preprocess_dataset(seq_len, model_name, start_date, end_date):
             'seasonal',
             'residual'
         ]]
-    # 沒有開啟冷氣機時的數值更改
-    dataset = dataset.fillna(method='ffill')
-    dataset = dataset.fillna(0)
-    dataset.loc[dataset['I_O'] == 0, 'ac_temp'] = 32
-    dataset.loc[dataset['I_O'] == 0, 'fan'] = 4
-    dataset.loc[dataset['I_O'] == 0, 'PM-3133_AI.Kwh'] = 0
-    dataset.to_csv("fuck.csv", encoding="UTF-8")
+    dataset.to_csv('debug.csv', encoding="UTF-8")
     print(dataset.isnull().any().any())
     print(dataset)
     return dataset

@@ -3,7 +3,7 @@ import argparse
 
 def Model_args():
     parser = argparse.ArgumentParser()    # 創立parser物件
-    parser.add_argument('--epochs', type=int, default=10000, help='訓練回合數')
+    parser.add_argument('--epochs', type=int, default=5000, help='訓練回合數')
     parser.add_argument('--batch_size', type=int, default=100, help='批次大小')
     parser.add_argument('--seq_len', type=int, default=30, help='時序長度')
     # 調整-優化器
